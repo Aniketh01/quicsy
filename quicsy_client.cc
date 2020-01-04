@@ -21,7 +21,7 @@
 
 #include <http-parser/http_parser.h>
 
-#include "client.h"
+#include "quicsy_client.h"
 #include "network.h"
 #include "debug.h"
 #include "util.h"

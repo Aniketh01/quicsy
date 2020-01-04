@@ -18,8 +18,17 @@ LDADD = $(top_builddir)/../ngtcp2/crypto/openssl/libngtcp2_crypto_openssl.la \
 		@LIBNGHTTP3_LIBS@
 
 
-bin_PROGRAMS = quicsy
-quicsy_SOURCES = quicsy.h quicsy.cc \
+noinst_PROGRAMS = quicsy_client quicsy_server
+
+quicsy_client_SOURCES = quicsy_client.h quicsy_client.cc \
+				 keylog.h keylog.cc \
+				 util.h util.cc \
+				 network.h template.h \
+				 shared.h shared.cc \
+				 debug.h debug.cc \
+				 http.h http.cc
+
+quicsy_server_SOURCES = quicsy_server.h quicsy_server.cc \
 				 keylog.h keylog.cc \
 				 util.h util.cc \
 				 network.h template.h \

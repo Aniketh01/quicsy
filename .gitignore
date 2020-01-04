@@ -65,11 +65,12 @@ config.sub
 libtool
 ltmain.sh
 quicsy
+quicsy_client
+quicsy_server
 libltdl/
 m4/
-.libs/
 ngtcp2/
-
+.libs/
 # Kernel Module Compile Results
 *.mod*
 *.cmd
