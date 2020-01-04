@@ -68,6 +68,8 @@ quicsy
 libltdl/
 m4/
 .libs/
+ngtcp2/
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd
