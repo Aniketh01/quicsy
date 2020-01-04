@@ -66,22 +66,36 @@ link_libraries(
 	${LIBNGHTTP3_LIBRARIES}
 	)
 
-set(client_SOURCES
-	quic_client.cc
-	)
+#set(client_SOURCES
+#	quic_client.cc
+#	)
 
 #set(server_SOURCES
 #	)
 
 set(quicsy_SOURCES
 	quicsy.cc
-	quicsy_tls.cc
+	util.cc
+    keylog.cc
 	)
 
-add_executable(quicsy ${quicsy_SOURCES})
+add_executable(quicsy ${quicsy_SOURCES} $<TARGET_OBJECTS:http-parser>)
 
 set_target_properties(quicsy PROPERTIES
 	COMPILE_FLAGS "${WARNCXXFLAGS}"
-	CXX_STANDARD 14
+	CXX_STANDARD 17
 	CXX_STANDARD_REQUIRED ON
 	)
+
+add_executable(client ${client_SOURCES} $<TARGET_OBJECTS:http-parser>)
+add_executable(server ${server_SOURCES} $<TARGET_OBJECTS:http-parser>)
+set_target_properties(client PROPERTIES
+    COMPILE_FLAGS "${WARNCXXFLAGS}"
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+  )
+set_target_properties(server PROPERTIES
+    COMPILE_FLAGS "${WARNCXXFLAGS}"
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+  )
