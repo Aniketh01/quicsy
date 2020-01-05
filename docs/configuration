@@ -1,0 +1,40 @@
+To configure quicsy:
+
+We need to setup the patched version of openssl, ngtcp2 and nghttp3.
+
+The following commands below showcases how to clone and install the libraries for quicsy.
+
+Openssl
+
+$ git clone --depth 1 -b openssl-quic-draft-23 https://github.com/tatsuhiro-t/openssl
+$ ./config enable-tls1_3 --prefix=/home/devbox/devel/quic_research/build_openssl
+$ make -j$(nproc)
+$ make install_sw
+
+nghttp3
+
+$ git clone https://github.com/ngtcp2/nghttp3
+$ autoreconf -r
+$ ./configure --prefix=/home/devbox/devel/quic_research/nghttp3_build --enable-lib-only
+$ make -j$(nproc) 
+$ make install
+
+ngtcp2
+
+$ git clone https://github.com/ngtcp2/ngtcp2
+$ cd ngtcp2
+$ autoreconf -i
+$ ./configure PKG_CONFIG_PATH=../build_openssl/lib/pkgconfig:../nghttp3_build/lib/pkgconfig LDFLAGS="-Wl,-rpath,../build_openssl/lib" --prefix=/home/devbox/devel/quic_research
+$ make -j$(nproc)
+
+Once all the libraries are build and installed, next step is to build the quicsy tool.
+
+$ git clone https://github.com/Aniketh01/quicsy
+$ cd quicsy
+$ sh autogen.sh
+$ cmake .
+$ PKG_CONFIG_PATH=/home/devbox/devel/quic_research/build_openssl/lib/pkgconfig:/home/devbox/devel/quic_research/nghttp3_build/lib/pkgconfig:/home/devbox/devel/quic_research/ngtcp2/lib ./configure
+$ make && sudo make install
+
+Note: If quicsy fails to fetch libssl.so shared library file of patched openssl, then export `LD_LIBRARY_PATH`
+$ export LD_LIBRARY_PATH=/home/devbox/devel/quic_research/build_openssl/lib
