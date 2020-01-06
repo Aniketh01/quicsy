@@ -1,6 +1,8 @@
 AM_CFLAGS = $(WARNCFLAGS) $(DEBUGCFLAGS)
 AM_CXXFLAGS = $(WARNCXXFLAGS) $(DEBUGCFLAGS)
 
+ACLOCAL_AMFLAGS = -I m4
+
 AM_CPPFLAGS = \
 			  -I$(top_srcdir)/../ngtcp2/lib/includes \
 			  -I$(top_builddir)/../ngtcp2/lib/includes \
