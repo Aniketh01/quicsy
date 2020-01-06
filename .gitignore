@@ -74,6 +74,7 @@ m4/
 ngtcp2/
 .libs/
 stamp-h1
+bin/
 
 # Kernel Module Compile Results
 *.mod*
