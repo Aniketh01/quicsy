@@ -14,10 +14,10 @@ LDADD = $(top_builddir)/../ngtcp2/crypto/openssl/libngtcp2_crypto_openssl.la \
 		@LIBEV_LIBS@ \
 		@LIBNGHTTP3_LIBS@
 
-bin_PROGRAMS = quicsy_client quicsy_server
+bin_PROGRAMS = $(top_builddir)/bin/quicsy_client $(top_builddir)/bin/quicsy_server
 
-quicsy_client_SOURCES = quicsy_client.cc keylog.cc \
+__top_builddir__bin_quicsy_client_SOURCES = quicsy_client.cc keylog.cc \
                  util.cc shared.cc debug.cc http.cc
 
-quicsy_server_SOURCES = quicsy_server.cc keylog.cc \
+__top_builddir__bin_quicsy_server_SOURCES = quicsy_server.cc keylog.cc \
                   util.cc shared.cc debug.cc http.cc
