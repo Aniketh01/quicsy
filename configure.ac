@@ -1,12 +1,13 @@
 AC_INIT([quicsy], [0.1], [anikethgireesh@gmail.com])
-AM_INIT_AUTOMAKE
 AC_PROG_CC
 AC_PROG_CXX([g++])
 LT_INIT([dlopen])
-LTDL_INIT([recursive])
 LT_CONFIG_LTDL_DIR([libltdl])
-AC_CONFIG_FILES([Makefile])
+LTDL_INIT([recursive])
+AC_CONFIG_FILES([Makefile third-party/Makefile])
 AC_CONFIG_MACRO_DIRS([m4])
+
+AM_INIT_AUTOMAKE([subdir-objects])
 
 AC_SUBST(LT_CURRENT, 0)
 AC_SUBST(LT_REVISION, 0)

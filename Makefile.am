@@ -3,6 +3,8 @@ AM_CXXFLAGS = $(WARNCXXFLAGS) $(DEBUGCFLAGS)
 
 ACLOCAL_AMFLAGS = -I m4
 
+SUBDIRS = third-party .
+
 AM_CPPFLAGS = \
 			  -I$(top_srcdir)/../ngtcp2/lib/includes \
 			  -I$(top_builddir)/../ngtcp2/lib/includes \
@@ -18,7 +20,6 @@ LDADD = $(top_builddir)/../ngtcp2/crypto/openssl/libngtcp2_crypto_openssl.la \
 		@OPENSSL_LIBS@ \
 		@LIBEV_LIBS@ \
 		@LIBNGHTTP3_LIBS@
-
 
 noinst_PROGRAMS = quicsy_client quicsy_server
 
