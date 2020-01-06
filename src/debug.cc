@@ -1,10 +1,9 @@
-#include "debug.h"
+#include <quicsy/debug.h>
+#include <quicsy/util.h>
 
 #include <cassert>
 #include <random>
 #include <iostream>
-
-#include "util.h"
 
 namespace ngtcp2 {
 

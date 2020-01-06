@@ -1,7 +1,8 @@
 #include <string>
 
-#include "keylog.h"
-#include "util.h"
+#include <quicsy/keylog.h>
+#include <quicsy/options.h>
+#include <quicsy/util.h>
 
 namespace ngtcp2 {
 

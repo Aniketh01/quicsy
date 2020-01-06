@@ -1,10 +1,19 @@
 AC_INIT([quicsy], [0.1], [anikethgireesh@gmail.com])
 AC_PROG_CC
 AC_PROG_CXX([g++])
+
 LT_INIT([dlopen])
 LT_CONFIG_LTDL_DIR([libltdl])
 LTDL_INIT([recursive])
-AC_CONFIG_FILES([Makefile third-party/Makefile])
+
+AC_CONFIG_FILES([Makefile
+				 third-party/Makefile
+				 include/Makefile
+				 include/quicsy/Makefile
+				 src/Makefile])
+
+AC_CONFIG_SRCDIR([src/quicsy.cc])
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIRS([m4])
 
 AM_INIT_AUTOMAKE([subdir-objects])

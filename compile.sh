@@ -4,7 +4,7 @@ PKG_CONFIG_PATH=/home/devbox/devel/quic_research/build_openssl/lib/pkgconfig:/ho
 echo "make..."
 make -j$(nproc)
 echo "make install..."
-make install
+sudo make install
 echo
 echo "Compiled successfully!!!"
 echo

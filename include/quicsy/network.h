@@ -11,9 +11,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include <array>
-
 #include <ngtcp2/ngtcp2.h>
+
+#include <array>
 
 namespace ngtcp2 {
 

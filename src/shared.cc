@@ -1,4 +1,4 @@
-#include "shared.h"
+#include <quicsy/shared.h>
 
 #include <nghttp3/nghttp3.h>
 

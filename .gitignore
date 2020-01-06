@@ -62,15 +62,19 @@ CMakeFiles/
 cmake_install.cmake
 config.guess
 config.sub
+config.h
+config.h.in
+config.h.in~
 libtool
 ltmain.sh
-quicsy
 quicsy_client
 quicsy_server
 libltdl/
 m4/
 ngtcp2/
 .libs/
+stamp-h1
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd

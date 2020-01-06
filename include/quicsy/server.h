@@ -9,7 +9,6 @@
 #include <map>
 #include <string>
 #include <deque>
-#include <memory>
 
 #include <ngtcp2/ngtcp2.h>
 #include <ngtcp2/ngtcp2_crypto.h>

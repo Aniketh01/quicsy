@@ -1,5 +1,5 @@
-#ifndef TEMPLATE_H
-#define TEMPLATE_H
+#ifndef OPTIONS_H
+#define OPTIONS_H
 
 #include <functional>
 #include <utility>
@@ -44,4 +44,4 @@ constexpr unsigned long long operator"" _g(unsigned long long g) {
   return g * 1024 * 1024 * 1024;
 }
 
-#endif // TEMPLATE_H
+#endif

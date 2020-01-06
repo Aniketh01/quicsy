@@ -20,14 +20,14 @@
 
 #include <http-parser/http_parser.h>
 
-#include "quicsy_server.h"
-#include "network.h"
-#include "debug.h"
-#include "util.h"
-#include "shared.h"
-#include "http.h"
-#include "keylog.h"
-#include "template.h"
+#include <quicsy/server.h>
+#include <quicsy/network.h>
+#include <quicsy/debug.h>
+#include <quicsy/util.h>
+#include <quicsy/shared.h>
+#include <quicsy/options.h>
+#include <quicsy/keylog.h>
+#include <quicsy/http.h>
 
 using namespace ngtcp2;
 
