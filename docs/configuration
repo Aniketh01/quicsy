@@ -36,5 +36,7 @@ $ cmake .
 $ PKG_CONFIG_PATH=/home/devbox/devel/quic_research/build_openssl/lib/pkgconfig:/home/devbox/devel/quic_research/nghttp3_build/lib/pkgconfig:/home/devbox/devel/quic_research/ngtcp2/lib ./configure
 $ make && sudo make install
 
-Note: If quicsy fails to fetch libssl.so shared library file of patched openssl, then export `LD_LIBRARY_PATH`
+Note: If quicsy fails to fetch libssl.so shared library file of patched openssl, then export `LD_LIBRARY_PATH`.
+The error can look similar to this:
+`error while loading shared libraries: libssl.so.3: cannot open shared object file: No such file or directory`
 $ export LD_LIBRARY_PATH=/home/devbox/devel/quic_research/build_openssl/lib
