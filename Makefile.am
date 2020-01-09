@@ -1,9 +1,7 @@
 AM_CFLAGS = $(WARNCFLAGS) $(DEBUGCFLAGS)
 AM_CXXFLAGS = $(WARNCXXFLAGS) $(DEBUGCFLAGS)
 
-SUBDIRS = third-party .
-
-SUBDIRS += include src
+SUBDIRS = third-party include src
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 

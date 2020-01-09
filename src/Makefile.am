@@ -1,4 +1,5 @@
 AM_CPPFLAGS = \
+			  -I$(top_srcdir)/include \
 			  -I$(top_srcdir)/../ngtcp2/lib/includes \
 			  -I$(top_builddir)/../ngtcp2/lib/includes \
 			  -I$(top_srcdir)/../ngtcp2/crypto/includes \
