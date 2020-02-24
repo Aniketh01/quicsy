@@ -7,21 +7,22 @@ int main(int argc, const char** argv) {
     GLFWwindow* window;
 
     if (!glfwInit()) {
-        printf("Couldn't init GLFW\n");
+        err_log("Couldn't init GLFW");
         return 1;
     }
 
     window = glfwCreateWindow(1280, 720, "QUIC streamer", NULL, NULL);
     if (!window) {
-        printf("Couldn't open window\n");
+        err_log("Couldn't open window");
         return 1;
     }
 
     decoder_t dec;
     if (!quicsy_decoder_open(&dec, argv[1])) {
-        printf("Couldn't open video file\n");
+        err_log("Couldn't open video file");
         return 1;
     }
+	log("opening the input file (%s) and loading format (container) header", argv[1]);
 
     glfwMakeContextCurrent(window);
 
@@ -38,11 +39,8 @@ int main(int argc, const char** argv) {
 
     // Allocate frame buffer
     const int frame_width = dec.width;
-	fprintf(stderr, "Frame width: %d\n", frame_width);
     const int frame_height = dec.height;
-    fprintf(stderr, "Frame height: %d\n", frame_height);
 	uint8_t* frame_data = new uint8_t[frame_width * frame_height * 4];
-    fprintf(stderr, "Frame data: %d\n", frame_data);
 
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -57,7 +55,7 @@ int main(int argc, const char** argv) {
         // Read a new frame and load it into texture
         int64_t pts;
         if (!quicsy_decoder_read_frame(&dec, frame_data, &pts)) {
-            printf("Couldn't load video frame\n");
+            err_log("Couldn't load video frame\n");
             return 1;
         }
 
