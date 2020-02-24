@@ -22,3 +22,23 @@ typedef struct decoder_st {
 bool quicsy_decoder_open(decoder_t* dec, const char* filename);
 bool quicsy_decoder_read_frame(decoder_t* dec, uint8_t* frame_buffer, int64_t* pts);
 void quicsy_decoder_close(decoder_t* dec);
+
+static void log(const char *fmt, ...)
+{
+    va_list args;
+    fprintf( stdout, "LOG: " );
+    va_start( args, fmt );
+    vfprintf( stdout, fmt, args );
+    va_end( args );
+    fprintf( stdout, "\n" );
+}
+
+static void err_log(const char *fmt, ...)
+{
+    va_list args;
+    fprintf( stderr, "ERROR: " );
+    va_start( args, fmt );
+    vfprintf( stderr, fmt, args );
+    va_end( args );
+    fprintf( stderr, "\n" );
+}
