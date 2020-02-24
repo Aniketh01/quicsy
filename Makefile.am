@@ -5,6 +5,11 @@ SUBDIRS = third-party include src
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
+# Very hacky way to make use of autotools
+# Using Makefile as a script isn't what it is meant for. 
+streamer:
+	cc streaming/main_window.cpp streaming/decoder.cpp -lstdc++ -lavcodec -lavformat -lavutil -lswresample -lswscale -lglfw -lGL -o bin/player
+
 #noinst_PROGRAMS = quicsy_client quicsy_server
 
 #quicsy_client_SOURCES = quicsy_client.h quicsy_client.cc \
