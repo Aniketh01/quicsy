@@ -7,16 +7,16 @@ extern "C" {
 
 typedef struct decoder_st {
     // Public things for other parts of the program to read from
-    int width, height;
+    int width = 0, height = 0;
     AVRational time_base;
 
     // Private internal state
-    AVFormatContext* av_format_ctx;
-    AVCodecContext* av_codec_ctx;
-    int video_stream_index;
-    AVFrame* av_frame;
-    AVPacket* av_packet;
-    SwsContext* sws_scaler_ctx;
+    AVFormatContext* av_format_ctx = NULL;
+    AVCodecContext* av_codec_ctx = NULL;
+    int video_stream_index = 0;
+    AVFrame* av_frame = NULL;
+    AVPacket* av_packet = NULL;
+    SwsContext* sws_scaler_ctx = NULL;
 } decoder_t;
 
 bool quicsy_decoder_open(decoder_t* dec, const char* filename);
