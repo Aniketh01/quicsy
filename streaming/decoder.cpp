@@ -15,12 +15,12 @@ bool quicsy_decoder_open(decoder_t* dec, const char* filename) {
     // Open the file using libavformat
     av_format_ctx = avformat_alloc_context();
     if (!av_format_ctx) {
-        printf("Couldn't created AVFormatContext\n");
+        err_log("Couldn't created AVFormatContext");
         return false;
     }
 
     if (avformat_open_input(&av_format_ctx, filename, NULL, NULL) != 0) {
-        printf("Couldn't open video file\n");
+        err_log("Couldn't open video file");
         return false;
     }
 
