@@ -1,0 +1,12 @@
+[submodule "deps/nghttp3"]
+	path = deps/nghttp3
+	url = https://github.com/Aniketh01/nghttp3.git
+	branch = quicsy-draft-25
+[submodule "deps/ngtcp2"]
+	path = deps/ngtcp2
+	url = https://github.com/Aniketh01/ngtcp2.git
+	branch = quicsy-draft-25
+[submodule "deps/openssl"]
+	path = deps/openssl
+	url = https://github.com/tatsuhiro-t/openssl
+	branch = OpenSSL_1_1_1d-quic-draft-25
