@@ -8,6 +8,7 @@
 #include <vector>
 #include <deque>
 #include <map>
+#include <string_view>
 
 #include <ngtcp2/ngtcp2.h>
 #include <ngtcp2/ngtcp2_crypto.h>
@@ -23,7 +24,7 @@
 using namespace ngtcp2;
 
 struct Request {
-  std::string scheme;
+  std::string_view scheme;
   std::string authority;
   std::string path;
 };
@@ -53,7 +54,7 @@ struct Config {
   // messages.
   bool quiet;
   // timeout is an idle timeout for QUIC connection.
-  uint32_t timeout;
+  ngtcp2_duration timeout;
   // session_file is a path to a file to write, and read TLS session.
   const char *session_file;
   // tp_file is a path to a file to write, and read QUIC transport
@@ -63,22 +64,22 @@ struct Config {
   bool show_secret;
   // change_local_addr is the duration after which client changes
   // local address.
-  double change_local_addr;
+  ngtcp2_duration change_local_addr;
   // key_update is the duration after which client initiates key
   // update.
-  double key_update;
+  ngtcp2_duration key_update;
   // delay_stream is the duration after which client sends the first
   // 1-RTT stream.
-  double delay_stream;
+  ngtcp2_duration delay_stream;
   // nat_rebinding is true if simulated NAT rebinding is enabled.
   bool nat_rebinding;
   // no_preferred_addr is true if client do not follow preferred
   // address offered by server.
   bool no_preferred_addr;
-  std::string http_method;
+  std::string_view http_method;
   // download is a path to a directory where a downloaded file is
   // saved.  If it is empty, no file is saved.
-  std::string download;
+  std::string_view download;
   // requests contains URIs to request.
   std::vector<Request> requests;
   // no_quic_dump is true if hexdump of QUIC STREAM and CRYPTO data
@@ -88,25 +89,50 @@ struct Config {
   // disabled.
   bool no_http_dump;
   // qlog_file is the path to write qlog.
-  std::string qlog_file;
+  const char *qlog_file;
+  // max_data is the initial connection-level flow control window.
+  uint64_t max_data;
+  // max_stream_data_bidi_local is the initial stream-level flow
+  // control window for a bidirectional stream that the local endpoint
+  // initiates.
+  uint64_t max_stream_data_bidi_local;
+  // max_stream_data_bidi_remote is the initial stream-level flow
+  // control window for a bidirectional stream that the remote
+  // endpoint initiates.
+  uint64_t max_stream_data_bidi_remote;
+  // max_stream_data_uni is the initial stream-level flow control
+  // window for a unidirectional stream.
+  uint64_t max_stream_data_uni;
+  // max_streams_bidi is the number of the concurrent bidirectional
+  // streams.
+  uint64_t max_streams_bidi;
+  // max_streams_uni is the number of the concurrent unidirectional
+  // streams.
+  uint64_t max_streams_uni;
+  // exit_on_first_stream_close is the flag that if it is true, client
+  // exits when a first HTTP stream gets closed.  It is not
+  // necessarily the same time when the underlying QUIC stream closes
+  // due to the QPACK synchronization.
+  bool exit_on_first_stream_close;
+  // disable_early_data disables early data.
+  bool disable_early_data;
+  // static_secret is used to derive keying materials for Stateless
+  // Retry token.
+  std::array<uint8_t, 32> static_secret;
 };
 
 struct Buffer {
   Buffer(const uint8_t *data, size_t datalen);
   explicit Buffer(size_t datalen);
 
-  size_t size() const { return tail - begin; }
+  size_t size() const { return tail - buf.data(); }
   size_t left() const { return buf.data() + buf.size() - tail; }
   uint8_t *const wpos() { return tail; }
-  const uint8_t *rpos() const { return begin; }
+  const uint8_t *rpos() const { return buf.data(); }
   void push(size_t len) { tail += len; }
-  void reset() { tail = begin; }
+  void reset() { tail = buf.data(); }
 
   std::vector<uint8_t> buf;
-  // begin points to the beginning of the buffer.  This might point to
-  // buf.data() if a buffer space is allocated by this object.  It is
-  // also allowed to point to the external shared buffer.
-  uint8_t *begin;
   // tail points to the position of the buffer where write should
   // occur.
   uint8_t *tail;
@@ -116,7 +142,7 @@ struct Stream {
   Stream(const Request &req, int64_t stream_id);
   ~Stream();
 
-  int open_file(const std::string &path);
+  int open_file(const std::string_view &path);
 
   Request req;
   int64_t stream_id;
@@ -172,7 +198,10 @@ public:
   void on_recv_retry();
   int change_local_addr();
   void start_change_local_addr_timer();
-  int update_key();
+  int update_key(uint8_t *rx_secret, uint8_t *tx_secret, uint8_t *rx_key,
+                 uint8_t *rx_iv, uint8_t *tx_key, uint8_t *tx_iv,
+                 const uint8_t *current_rx_secret,
+                 const uint8_t *current_tx_secret, size_t secretlen);
   int initiate_key_update();
   void start_key_update_timer();
   void start_delay_stream_timer();
@@ -196,6 +225,7 @@ public:
   int on_stream_reset(int64_t stream_id);
   int extend_max_stream_data(int64_t stream_id, uint64_t max_data);
   int send_stop_sending(int64_t stream_id, uint64_t app_error_code);
+  int http_stream_close(int64_t stream_id, uint64_t app_error_code);
 
   void reset_idle_timer();
 
@@ -219,8 +249,6 @@ private:
   int fd_;
   std::map<int64_t, std::unique_ptr<Stream>> streams_;
   Crypto crypto_[3];
-  std::vector<uint8_t> tx_secret_;
-  std::vector<uint8_t> rx_secret_;
   FILE *qlog_;
   ngtcp2_conn *conn_;
   nghttp3_conn *httpconn_;
@@ -238,6 +266,9 @@ private:
   uint32_t version_;
   // early_data_ is true if client attempts to do 0RTT data transfer.
   bool early_data_;
+  // should_exit_ is true if client should exit rather than waiting
+  // for timeout.
+  bool should_exit_;
 };
 
 #endif // CLIENT_H
