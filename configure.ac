@@ -6,6 +6,26 @@ LT_INIT([dlopen])
 LT_CONFIG_LTDL_DIR([libltdl])
 LTDL_INIT([recursive])
 
+# Checks for programs
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_MKDIR_P
+
+# Checks for header files.
+AC_CHECK_HEADERS([ \
+  arpa/inet.h \
+  netinet/in.h \
+  stddef.h \
+  stdint.h \
+  stdlib.h \
+  string.h \
+  unistd.h \
+  sys/endian.h \
+  endian.h \
+])
+
 AC_CONFIG_FILES([Makefile
 				 third-party/Makefile
 				 include/Makefile
@@ -57,6 +77,8 @@ if test "x${have_libev}" = "xyes"; then
   fi
 fi
 LIBS=$save_LIBS
+
+CXXFLAGS="$CXXFLAGS -std=c++17"
 
 AC_OUTPUT
 

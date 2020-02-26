@@ -49,7 +49,7 @@ struct Config {
   // messages.
   bool quiet;
   // timeout is an idle timeout for QUIC connection.
-  uint32_t timeout;
+  ngtcp2_duration timeout;
   // show_secret is true if transport secrets should be printed out.
   bool show_secret;
   // validate_addr is true if server requires address validation.
@@ -63,7 +63,38 @@ struct Config {
   // certificate based authentication.
   bool verify_client;
   // qlog_dir is the path to directory where qlog is stored.
-  std::string qlog_dir;
+  std::string_view qlog_dir;
+  // no_quic_dump is true if hexdump of QUIC STREAM and CRYPTO data
+  // should be disabled.
+  bool no_quic_dump;
+  // no_http_dump is true if hexdump of HTTP response body should be
+  // disabled.
+  bool no_http_dump;
+  // max_data is the initial connection-level flow control window.
+  uint64_t max_data;
+  // max_stream_data_bidi_local is the initial stream-level flow
+  // control window for a bidirectional stream that the local endpoint
+  // initiates.
+  uint64_t max_stream_data_bidi_local;
+  // max_stream_data_bidi_remote is the initial stream-level flow
+  // control window for a bidirectional stream that the remote
+  // endpoint initiates.
+  uint64_t max_stream_data_bidi_remote;
+  // max_stream_data_uni is the initial stream-level flow control
+  // window for a unidirectional stream.
+  uint64_t max_stream_data_uni;
+  // max_streams_bidi is the number of the concurrent bidirectional
+  // streams.
+  uint64_t max_streams_bidi;
+  // max_streams_uni is the number of the concurrent unidirectional
+  // streams.
+  uint64_t max_streams_uni;
+  // max_dyn_length is the maximum length of dynamically generated
+  // response.
+  uint64_t max_dyn_length;
+  // static_secret is used to derive keying materials for Retry and
+  // Stateless Retry token.
+  std::array<uint8_t, 32> static_secret;
 };
 
 struct Buffer {
@@ -88,11 +119,11 @@ struct Buffer {
 };
 
 struct HTTPHeader {
-  HTTPHeader(const std::string &name, const std::string &value)
+  HTTPHeader(const std::string_view &name, const std::string_view &value)
       : name(name), value(value) {}
 
-  std::string name;
-  std::string value;
+  std::string_view name;
+  std::string_view value;
 };
 
 class Handler;
@@ -101,15 +132,14 @@ struct Stream {
   Stream(int64_t stream_id, Handler *handler);
   ~Stream();
 
-  int recv_data(uint8_t fin, const uint8_t *data, size_t datalen);
   int start_response(nghttp3_conn *conn);
   int open_file(const std::string &path);
   int map_file(size_t len);
   int send_status_response(nghttp3_conn *conn, unsigned int status_code,
                            const std::vector<HTTPHeader> &extra_headers = {});
   int send_redirect_response(nghttp3_conn *conn, unsigned int status_code,
-                             const std::string &path);
-  int64_t find_dyn_length(const std::string &path);
+                             const std::string_view &path);
+  int64_t find_dyn_length(const std::string_view &path);
   void http_acked_stream_data(size_t datalen);
 
   int64_t stream_id;
@@ -130,13 +160,8 @@ struct Stream {
   bool dynresp;
   // dyndataleft is the number of dynamic data left to send.
   uint64_t dyndataleft;
-  // dynackedoffset is the offset of acked data in the first element
-  // of dynbufs.
-  size_t dynackedoffset;
-  // dynbuflen is the number of bytes buffered in dybufs.
-  size_t dynbuflen;
-  // dynbufs stores the buffers for dynamic data response.
-  std::deque<std::unique_ptr<std::vector<uint8_t>>> dynbufs;
+  // dynbuflen is the number of bytes in-flight.
+  uint64_t dynbuflen;
   // mmapped is true if data points to the memory assigned by mmap.
   bool mmapped;
 };
@@ -167,7 +192,8 @@ public:
 
   int init(const Endpoint &ep, const sockaddr *sa, socklen_t salen,
            const ngtcp2_cid *dcid, const ngtcp2_cid *scid,
-           const ngtcp2_cid *ocid, uint32_t version);
+           const ngtcp2_cid *ocid, const uint8_t *token, size_t tokenlen,
+           uint32_t version);
 
   int on_read(const Endpoint &ep, const sockaddr *sa, socklen_t salen,
               uint8_t *data, size_t datalen);
@@ -214,7 +240,10 @@ public:
 
   void set_tls_alert(uint8_t alert);
 
-  int update_key();
+  int update_key(uint8_t *rx_secret, uint8_t *tx_secret, uint8_t *rx_key,
+                 uint8_t *rx_iv, uint8_t *tx_key, uint8_t *tx_iv,
+                 const uint8_t *current_rx_secret,
+                 const uint8_t *current_tx_secret, size_t secretlen);
 
   int setup_httpconn();
   void http_consume(int64_t stream_id, size_t nconsumed);
@@ -230,12 +259,14 @@ public:
   int extend_max_stream_data(int64_t stream_id, uint64_t max_data);
   void shutdown_read(int64_t stream_id, int app_error_code);
   void http_acked_stream_data(int64_t stream_id, size_t datalen);
-  int push_content(int64_t stream_id, const std::string &authority,
-                   const std::string &path);
+  int push_content(int64_t stream_id, const std::string_view &authority,
+                   const std::string_view &path);
+  void http_stream_close(int64_t stream_id, uint64_t app_error_code);
 
   void reset_idle_timer();
 
   void write_qlog(const void *data, size_t datalen);
+  void singal_write();
 
 private:
   Endpoint *endpoint_;
@@ -262,16 +293,12 @@ private:
   // This packet is repeatedly sent as a response to the incoming
   // packet in draining period.
   std::unique_ptr<Buffer> conn_closebuf_;
-  std::vector<uint8_t> tx_secret_;
-  std::vector<uint8_t> rx_secret_;
   QUICError last_error_;
   // nkey_update_ is the number of key update occurred.
   size_t nkey_update_;
   // draining_ becomes true when draining period starts.
   bool draining_;
 };
-
-constexpr size_t TOKEN_SECRETLEN = 16;
 
 class Server {
 public:
@@ -289,17 +316,19 @@ public:
                                socklen_t salen);
   int send_retry(const ngtcp2_pkt_hd *chd, Endpoint &ep, const sockaddr *sa,
                  socklen_t salen);
+  int send_stateless_connection_close(const ngtcp2_pkt_hd *chd, Endpoint &ep,
+                                      const sockaddr *sa, socklen_t salen);
   int generate_token(uint8_t *token, size_t &tokenlen, const sockaddr *sa,
                      socklen_t salen, const ngtcp2_cid *ocid);
   int verify_token(ngtcp2_cid *ocid, const ngtcp2_pkt_hd *hd,
                    const sockaddr *sa, socklen_t salen);
-  int send_packet(Endpoint &ep, const Address &remote_addr, Buffer &buf,
-                  ev_io *wev = nullptr);
+  int send_packet(Endpoint &ep, const Address &remote_addr, const uint8_t *data,
+                  size_t datalen, size_t gso_size, ev_io *wev = nullptr);
   void remove(const Handler *h);
 
   int derive_token_key(uint8_t *key, size_t &keylen, uint8_t *iv, size_t &ivlen,
                        const uint8_t *rand_data, size_t rand_datalen);
-  int generate_rand_data(uint8_t *buf, size_t len);
+  void generate_rand_data(uint8_t *buf, size_t len);
   void associate_cid(const ngtcp2_cid *cid, Handler *h);
   void dissociate_cid(const ngtcp2_cid *cid);
 
@@ -313,7 +342,6 @@ private:
   SSL_CTX *ssl_ctx_;
   ngtcp2_crypto_aead token_aead_;
   ngtcp2_crypto_md token_md_;
-  std::array<uint8_t, TOKEN_SECRETLEN> token_secret_;
   ev_signal sigintev_;
 };
 
