@@ -1,6 +1,8 @@
 #include <quicsy/util.h>
 
-#  include <netinet/in.h>
+#include <quicsy/options.h>
+
+#include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 
@@ -10,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <limits>
 
 namespace ngtcp2 {
 
@@ -102,7 +105,7 @@ uint64_t round2even(uint64_t n) {
 }
 } // namespace
 
-std::string format_duration(uint64_t ns) {
+std::string format_durationf(uint64_t ns) {
   static constexpr const char *units[] = {"us", "ms", "s"};
   if (ns < 1000) {
     return std::to_string(ns) + "ns";
@@ -303,6 +306,183 @@ OSSL_ENCRYPTION_LEVEL from_ngtcp2_level(ngtcp2_crypto_level crypto_level) {
   default:
     assert(0);
   }
+}
+
+std::string format_duration(ngtcp2_duration n) {
+  if (n >= 3600 * NGTCP2_SECONDS && (n % (3600 * NGTCP2_SECONDS)) == 0) {
+    return format_uint(n / (3600 * NGTCP2_SECONDS)) + 'h';
+  }
+  if (n >= 60 * NGTCP2_SECONDS && (n % (60 * NGTCP2_SECONDS)) == 0) {
+    return format_uint(n / (60 * NGTCP2_SECONDS)) + 'm';
+  }
+  if (n >= NGTCP2_SECONDS && (n % NGTCP2_SECONDS) == 0) {
+    return format_uint(n / NGTCP2_SECONDS) + 's';
+  }
+  if (n >= NGTCP2_MILLISECONDS && (n % NGTCP2_MILLISECONDS) == 0) {
+    return format_uint(n / NGTCP2_MILLISECONDS) + "ms";
+  }
+  if (n >= NGTCP2_MICROSECONDS && (n % NGTCP2_MICROSECONDS) == 0) {
+    return format_uint(n / NGTCP2_MICROSECONDS) + "us";
+  }
+  return format_uint(n) + "ns";
+}
+
+namespace {
+std::tuple<uint64_t, size_t, int>
+parse_uint_internal(const std::string_view &s) {
+  uint64_t res = 0;
+
+  if (s.empty()) {
+    return {0, 0, -1};
+  }
+
+  for (size_t i = 0; i < s.size(); ++i) {
+    auto c = s[i];
+    if (c < '0' || '9' < c) {
+      return {res, i, 0};
+    }
+
+    auto d = c - '0';
+    if (res > (std::numeric_limits<uint64_t>::max() - d) / 10) {
+      return {0, i, -1};
+    }
+
+    res *= 10;
+    res += d;
+  }
+
+  return {res, s.size(), 0};
+}
+} // namespace
+
+std::pair<uint64_t, int> parse_uint(const std::string_view &s) {
+  auto [res, idx, rv] = parse_uint_internal(s);
+  if (rv != 0 || idx != s.size()) {
+    return {0, -1};
+  }
+  return {res, 0};
+}
+
+std::pair<uint64_t, int> parse_uint_iec(const std::string_view &s) {
+  auto [res, idx, rv] = parse_uint_internal(s);
+  if (rv != 0) {
+    return {0, rv};
+  }
+  if (idx == s.size()) {
+    return {res, 0};
+  }
+  if (idx + 1 != s.size()) {
+    return {0, -1};
+  }
+
+  uint64_t m;
+  switch (s[idx]) {
+  case 'G':
+  case 'g':
+    m = 1 << 30;
+    break;
+  case 'M':
+  case 'm':
+    m = 1 << 20;
+    break;
+  case 'K':
+  case 'k':
+    m = 1 << 10;
+    break;
+  default:
+    return {0, -1};
+  }
+
+  if (res > std::numeric_limits<uint64_t>::max() / m) {
+    return {0, -1};
+  }
+
+  return {res * m, 0};
+}
+
+std::pair<uint64_t, int> parse_duration(const std::string_view &s) {
+  auto [res, idx, rv] = parse_uint_internal(s);
+  if (rv != 0) {
+    return {0, rv};
+  }
+  if (idx == s.size()) {
+    return {res, 0};
+  }
+
+  uint64_t m;
+  if (idx + 1 == s.size()) {
+    switch (s[idx]) {
+    case 'H':
+    case 'h':
+      m = 3600 * NGTCP2_SECONDS;
+      break;
+    case 'M':
+    case 'm':
+      m = 60 * NGTCP2_SECONDS;
+      break;
+    case 'S':
+    case 's':
+      m = NGTCP2_SECONDS;
+      break;
+    default:
+      return {0, -1};
+    }
+  } else if (idx + 2 == s.size() && (s[idx + 1] == 's' || s[idx + 1] == 'S')) {
+    switch (s[idx]) {
+    case 'M':
+    case 'm':
+      m = NGTCP2_MILLISECONDS;
+      break;
+    case 'U':
+    case 'u':
+      m = NGTCP2_MICROSECONDS;
+      break;
+    case 'N':
+    case 'n':
+      return {res, 0};
+    default:
+      return {0, -1};
+    }
+  } else {
+    return {0, -1};
+  }
+
+  if (res > std::numeric_limits<uint64_t>::max() / m) {
+    return {0, -1};
+  }
+
+  return {res * m, 0};
+}
+
+namespace {
+auto randgen = make_mt19937();
+} // namespace
+
+int generate_secret(uint8_t *secret, size_t secretlen) {
+  std::array<uint8_t, 16> rand;
+  std::array<uint8_t, 32> md;
+
+  assert(md.size() == secretlen);
+
+  auto dis = std::uniform_int_distribution<uint8_t>(0, 255);
+  std::generate_n(rand.data(), rand.size(), [&dis]() { return dis(randgen); });
+
+  auto ctx = EVP_MD_CTX_new();
+  if (ctx == nullptr) {
+    return -1;
+  }
+
+  auto ctx_deleter = defer(EVP_MD_CTX_free, ctx);
+
+  unsigned int mdlen = md.size();
+  if (!EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr) ||
+      !EVP_DigestUpdate(ctx, rand.data(), rand.size()) ||
+      !EVP_DigestFinal_ex(ctx, md.data(), &mdlen)) {
+    return -1;
+  }
+
+  std::copy_n(std::begin(md), secretlen, secret);
+  return 0;
 }
 
 } // namespace util

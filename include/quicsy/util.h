@@ -10,6 +10,7 @@
 #include <string>
 #include <random>
 #include <map>
+#include <string_view>
 
 #include <ngtcp2/ngtcp2.h>
 #include <nghttp3/nghttp3.h>
@@ -52,12 +53,12 @@ template <size_t N> std::string format_hex(const uint8_t (&s)[N]) {
 
 std::string decode_hex(const std::string &s);
 
-// format_duration formats |ns| in human readable manner.  |ns| must
+// format_durationf formats |ns| in human readable manner.  |ns| must
 // be nanoseconds resolution.  This function uses the largest unit so
 // that the integral part is strictly more than zero, and the
 // precision is at most 2 digits.  For example, 1234 is formatted as
 // "1.23us".  The largest unit is seconds.
-std::string format_duration(uint64_t ns);
+std::string format_durationf(uint64_t ns);
 
 std::mt19937 make_mt19937();
 
@@ -190,8 +191,66 @@ ngtcp2_crypto_level from_ossl_level(OSSL_ENCRYPTION_LEVEL ossl_level);
 // OSSL_ENCRYPTION_LEVEL.
 OSSL_ENCRYPTION_LEVEL from_ngtcp2_level(ngtcp2_crypto_level crypto_level);
 
-} // namespace util
+// format_uint converts |n| into string.
+template <typename T> std::string format_uint(T n) {
+  std::string res;
+  if (n == 0) {
+    res = "0";
+    return res;
+  }
+  size_t nlen = 0;
+  for (auto t = n; t; t /= 10, ++nlen)
+    ;
+  res.resize(nlen);
+  for (; n; n /= 10) {
+    res[--nlen] = (n % 10) + '0';
+  }
+  return res;
+}
 
+// format_uint_iec converts |n| into string with the IEC unit (either
+// "G", "M", or "K").  It chooses the largest unit which does not drop
+// precision.
+template <typename T> std::string format_uint_iec(T n) {
+  if (n >= (1 << 30) && (n & ((1 << 30) - 1)) == 0) {
+    return format_uint(n / (1 << 30)) + 'G';
+  }
+  if (n >= (1 << 20) && (n & ((1 << 20) - 1)) == 0) {
+    return format_uint(n / (1 << 20)) + 'M';
+  }
+  if (n >= (1 << 10) && (n & ((1 << 10) - 1)) == 0) {
+    return format_uint(n / (1 << 10)) + 'K';
+  }
+  return format_uint(n);
+}
+
+// format_duration converts |n| into string with the unit in either
+// "h" (hours), "m" (minutes), "s" (seconds), "ms" (milliseconds),
+// "us" (microseconds) or "ns" (nanoseconds).  It chooses the largest
+// unit which does not drop precision.  |n| is in nanosecond
+// resolution.
+std::string format_duration(ngtcp2_duration n);
+
+// parse_uint parses |s| as 64-bit unsigned integer.  If it cannot
+// parse |s|, it returns -1 as the second return value.
+std::pair<uint64_t, int> parse_uint(const std::string_view &s);
+
+// parse_uint_iec parses |s| as 64-bit unsigned integer.  It accepts
+// IEC unit letter (either "G", "M", or "K") in |s|.  If it cannot
+// parse |s|, it returns -1 as the second return value.
+std::pair<uint64_t, int> parse_uint_iec(const std::string_view &s);
+
+// parse_duration parses |s| as 64-bit unsigned integer.  It accepts a
+// unit (either "h", "m", "s", "ms", "us", or "ns") in |s|.  If it
+// cannot parse |s|, it returns -1 as the second return value.
+std::pair<uint64_t, int> parse_duration(const std::string_view &s);
+
+// generate_secret generates secret and writes it to the buffer
+// pointed by |secret| of length |secretlen|.  Currently, |secretlen|
+// must be 32.
+int generate_secret(uint8_t *secret, size_t secretlen);
+
+} // namespace util
 } // namespace ngtcp2
 
 #endif // UTIL_H
