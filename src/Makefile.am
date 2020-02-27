@@ -1,15 +1,15 @@
 AM_CPPFLAGS = \
 			  -I$(top_srcdir)/include \
-			  -I$(top_srcdir)/../ngtcp2/lib/includes \
-			  -I$(top_builddir)/../ngtcp2/lib/includes \
-			  -I$(top_srcdir)/../ngtcp2/crypto/includes \
+			  -I$(top_srcdir)/deps/ngtcp2/lib/includes \
+			  -I$(top_builddir)/deps/ngtcp2/lib/includes \
+			  -I$(top_srcdir)/deps/ngtcp2/crypto/includes \
 			  -I$(top_srcdir)/third-party \
 			  @OPENSSL_LIBS@ \
 			  @LIBEV_LIBS@ \
 			  @DEFS@
 
-LDADD = $(top_builddir)/../ngtcp2/crypto/openssl/libngtcp2_crypto_openssl.la \
-		$(top_builddir)/../ngtcp2/lib/libngtcp2.la \
+LDADD = $(top_builddir)/deps/ngtcp2/crypto/openssl/libngtcp2_crypto_openssl.la \
+		$(top_builddir)/deps/ngtcp2/lib/libngtcp2.la \
 		$(top_builddir)/third-party/libhttp-parser.la \
 		@OPENSSL_LIBS@ \
 		@LIBEV_LIBS@ \

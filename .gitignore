@@ -75,6 +75,8 @@ ngtcp2/
 .libs/
 stamp-h1
 bin/
+deps/nghttp3_build/
+deps/openssl_build/
 
 # Kernel Module Compile Results
 *.mod*
