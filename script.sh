@@ -6,15 +6,19 @@ echo "Building dependencies for quicsy ..."
 echo "Building patched version of openssl ..."
 cd $rootdir/deps/openssl
 ./config enable-tls1_3 --prefix=$rootdir/deps/openssl_build
+./config enable-tls1_3
 make -j$(nproc)
 make install_sw
+sudo make install_sw
 
 echo "Building HTTP/3 with nghttp3 ..."
 cd $rootdir/deps/nghttp3
 autoreconf -i
 ./configure --prefix=$rootdir/deps/nghttp3_build --enable-lib-only
+./configure --enable-lib-only
 make -j$(nproc) 
 make install
+sudo make install
 
 echo "Building QUIC with ngtcp2 ..."
 cd $rootdir/deps/ngtcp2
