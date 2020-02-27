@@ -20,7 +20,7 @@ echo "Building QUIC with ngtcp2 ..."
 cd $rootdir/deps/ngtcp2
 autoreconf -i
 ./configure PKG_CONFIG_PATH=$rootdir/deps/openssl_build/lib/pkgconfig:$rootdir/deps/nghttp3_build/lib/pkgconfig LDFLAGS="-Wl,-rpath,$rootdir/deps/openssl_build/lib" --prefix=$rootdir/deps/ngtcp2_build
-make -j$(nproc)
+make -j$(nproc) check
 
 cd $rootdir/
 echo "building dependencies complete!"
