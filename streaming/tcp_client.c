@@ -1,57 +1,63 @@
-// Client.c
-#include <netdb.h> 
-#include <stdio.h>   
-#include <stdlib.h> 
-#include <string.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 #include <sys/socket.h>
-#define MAX 100
-#define PORT 8080 
-#define SA struct sockaddr
-void recvFile(int sockfd) 
-{ 
- char buff[MAX];  // to store message from client
- 
- FILE *fp;
- fp=fopen("received.txt","w"); // stores the file content in recieved.txt in the program directory
- 
- if( fp == NULL ){
-  printf("Error IN Opening File ");
-  return ;
- }
- 
- while( read(sockfd,buff,MAX) > 0 )
-  fprintf(fp,"%s",buff);
- 
- printf("File received successfully !! \n");
- printf("New File created is received.txt !! \n");
-}
-int main() 
-{ 
- int sockfd, connfd; 
- struct sockaddr_in servaddr, cli;
-// socket create and varification 
- sockfd = socket(AF_INET, SOCK_STREAM, 0); 
- if (sockfd == -1) { 
-  printf("socket creation failed...\n"); 
-  exit(0); 
- } 
- else
-  printf("Socket successfully created..\n"); 
- 
- bzero(&servaddr, sizeof(servaddr));
-// assign IP, PORT 
- servaddr.sin_family = AF_INET; 
- servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
- servaddr.sin_port = htons(PORT);
-// connect the client socket to server socket 
- if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) { 
-  printf("connection with the server failed...\n"); 
-  exit(0); 
- } 
- else
-  printf("connected to the server..\n");
-// function for sending File 
- recvFile(sockfd);
-// close the socket 
- close(sockfd); 
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#define PORT    5500
+#define IP      "127.0.0.1"
+#define MAXBUF  1024
+
+int main() {
+    struct sockaddr_in serv_addr;
+    int     	s;
+    int         sourse_fd;
+    char        buf[MAXBUF];
+    int         file_name_len, read_len;
+
+    /* socket() */
+    s = socket(AF_INET, SOCK_STREAM, 0);
+    if(s == -1) {
+        return 1;
+    }
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr(IP);
+    serv_addr.sin_port = htons(PORT);
+
+    if(connect(s, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1) {
+        perror("connect : ");
+        printf("fail to connect.\n");
+        close(s);
+        return 1;
+    }
+
+    memset(buf, 0x00, MAXBUF);
+    printf("write file name to send to the server:  ");
+    scanf("%s", buf);
+
+    printf(" > %s\n", buf);
+    file_name_len = strlen(buf) + 1;
+
+    send(s, buf, file_name_len, 0);
+    sourse_fd = open(buf, O_RDONLY);
+    if(!sourse_fd) {
+        perror("Error : ");
+        return 1;
+    }
+
+    while(1) {
+        memset(buf, 0x00, MAXBUF);
+        read_len = read(sourse_fd, buf, MAXBUF);
+        send(s, buf, read_len, 0);
+        if(read_len == 0) {
+            break;
+        }
+    }
+
+    return 0;
 }
