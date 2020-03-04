@@ -9,6 +9,8 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 # Using Makefile as a script isn't what it is meant for. 
 streamer:
 	cc streaming/main_window.cpp streaming/decoder.cpp -lstdc++ -lavcodec -lavformat -lavutil -lswresample -lswscale -lglfw -lGL -o bin/player
+transcoder:
+	cc streaming/transcoder.c streaming/debug.c -lstdc++ -lavcodec -lavformat -lavutil -lswresample -lswscale -lglfw -lGL -o bin/transcoder
 
 #noinst_PROGRAMS = quicsy_client quicsy_server
 
