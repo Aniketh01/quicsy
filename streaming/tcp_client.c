@@ -1,63 +1,81 @@
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 
-#define PORT    5500
-#define IP      "127.0.0.1"
-#define MAXBUF  1024
+#define MAX 1024
+#define PORT 8080
 
-int main() {
-    struct sockaddr_in serv_addr;
-    int     	s;
-    int         sourse_fd;
-    char        buf[MAXBUF];
-    int         file_name_len, read_len;
+void recvFile(int sockfd)
+{
+	char buff[MAX]; // to store message from client
 
-    /* socket() */
-    s = socket(AF_INET, SOCK_STREAM, 0);
-    if(s == -1) {
-        return 1;
-    }
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr(IP);
-    serv_addr.sin_port = htons(PORT);
+	int recv_fd, read_len;
+	recv_fd = open("recieved1.mp4", O_WRONLY | O_CREAT | O_TRUNC,
+				   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); // stores the file content in recieved.txt in the program directory
 
-    if(connect(s, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1) {
-        perror("connect : ");
-        printf("fail to connect.\n");
-        close(s);
-        return 1;
-    }
+	if (!recv_fd)
+	{
+		printf("Error IN Opening File ");
+		return;
+	}
 
-    memset(buf, 0x00, MAXBUF);
-    printf("write file name to send to the server:  ");
-    scanf("%s", buf);
+	while (1)
+	{
+		memset(buff, 0x00, MAX);
+		read_len = read(sockfd, buff, MAX);
+		write(recv_fd, buff, read_len);
+		if (read_len == 0)
+		{
+			printf("Download finish\n");
+			break;
+		}
+	}
+	// fprintf(fp,"%s",buff);
 
-    printf(" > %s\n", buf);
-    file_name_len = strlen(buf) + 1;
+	printf("File received successfully !! \n");
+	// printf("New File created is received.txt !! \n");
+}
 
-    send(s, buf, file_name_len, 0);
-    sourse_fd = open(buf, O_RDONLY);
-    if(!sourse_fd) {
-        perror("Error : ");
-        return 1;
-    }
+int main()
+{
+	int sockfd, connfd;
+	struct sockaddr_in servaddr, cli;
 
-    while(1) {
-        memset(buf, 0x00, MAXBUF);
-        read_len = read(sourse_fd, buf, MAXBUF);
-        send(s, buf, read_len, 0);
-        if(read_len == 0) {
-            break;
-        }
-    }
+	// socket create and varification
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd == -1)
+	{
+		printf("socket creation failed...\n");
+		exit(0);
+	}
+	else
+		printf("Socket successfully created..\n");
 
-    return 0;
+	bzero(&servaddr, sizeof(servaddr));
+
+	// assign IP, PORT
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	servaddr.sin_port = htons(PORT);
+
+	// connect the client socket to server socket
+	if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
+	{
+		printf("connection with the server failed...\n");
+		exit(0);
+	}
+	else
+		printf("connected to the server..\n");
+
+	// function for sending File
+	recvFile(sockfd);
+
+	// close the socket
+	close(sockfd);
 }

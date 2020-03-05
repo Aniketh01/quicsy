@@ -1,89 +1,105 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> // for basic memmory allocation and deallocation
+#include <stdio.h>	// for file read and write
+#include <netdb.h>
+#include <netinet/in.h>
 #include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
+#include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <unistd.h>
 
-#define PORT    5500
-#define MAXBUF  1024
+#define MAX 1024
+#define PORT 8080
 
-int main() {
-    int server_sockfd;
-    int client_sockfd;
-    int des_fd; // file num
-    struct sockaddr_in serveraddr, clientaddr;
-    int client_len, read_len, file_read_len;
-    char buf[MAXBUF];
+void sentFile(int sockfd)
+{
+	char buff[MAX]; // for read operation from file and used to sent operation
 
-    int check_bind;
-    client_len = sizeof(clientaddr);
+	// create file
+	int send_fd, read_len;
+	send_fd = open("/home/devbox/devel/quic_research/datasets/bbb_sunflower_1080p_60fps_normal.mp4", O_RDONLY); // open file uses both stdio and stdin header files
 
-    /* socket() */
-    server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if(server_sockfd == -1) {
-        perror("socket error : ");
-        exit(0);
-    }
+	// file should be present at the program directory
 
-    /* bind() */
-    bzero(&serveraddr, sizeof(serveraddr));
-    serveraddr.sin_family       = AF_INET;
-    serveraddr.sin_addr.s_addr  = htonl(INADDR_ANY);
-    serveraddr.sin_port         = htons(PORT);
+	if (!send_fd)
+	{
+		printf("Error IN Opening File .. \n");
+		return;
+	}
 
-    if(bind(server_sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) > 0) {
-        perror("bind error : ");
-        exit(0);
-    }
+	while (1)
+	{
+		memset(buff, 0x00, MAX);
+		read_len = read(send_fd, buff, MAX);
+		send(sockfd, buff, read_len, 0);
+		if (read_len == 0)
+		{
+			break;
+		}
+	}
 
-    /* listen */
-    if(listen(server_sockfd, 5) != 0) {
-        perror("listen error : ");
-    }
+	printf("File Sent successfully !!! \n");
+}
 
-    while(1) {
-        char file_name[MAXBUF];
-        memset(buf, 0x00, MAXBUF);
+int main()
+{
+	int sockfd, connfd, len;		  // create socket file descriptor
+	struct sockaddr_in servaddr, cli; // create structure object of sockaddr_in for client and server
 
-        /* accept() */
-        client_sockfd = accept(server_sockfd, (struct sockaddr *)&clientaddr, &client_len);
-        printf("New Client Connect : %s\n", inet_ntoa(clientaddr.sin_addr));
+	// socket create and verification
+	sockfd = socket(AF_INET, SOCK_STREAM, 0); // creating a TCP socket ( SOCK_STREAM )
 
-        /* file name */
-        read_len = read(client_sockfd, buf, MAXBUF);
-        if(read_len > 0) {
-            strcpy(file_name, buf);
-            printf("%s > %s\n", inet_ntoa(clientaddr.sin_addr), file_name);
-        } else {
-            close(client_sockfd);
-            break;
-        }
+	if (sockfd == -1)
+	{
+		printf("socket creation failed...\n");
+		exit(0);
+	}
+	else
+		printf("Socket successfully created..\n");
 
-        /* create file */
-        des_fd = open("movie.mp4", O_WRONLY | O_CREAT | O_TRUNC,
-            S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-        if(!des_fd) {
-            perror("file open error : ");
-            break;
-        }
-        /* file save */
-        while(1) {
-            memset(buf, 0x00, MAXBUF);
-            file_read_len = read(client_sockfd, buf, MAXBUF);
-            write(des_fd, buf, file_read_len);
-            if(file_read_len == 0) {
-                printf("finish download!\n");
-                break;
-            }
-        }
-        close(client_sockfd);
-        close(des_fd);
-    }
-    close(server_sockfd);
-    return 0;
+	// empty the
+	bzero(&servaddr, sizeof(servaddr));
+
+	// assign IP, PORT
+	servaddr.sin_family = AF_INET;				  // specifies address family with IPv4 Protocol
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY); // binds to any address
+	servaddr.sin_port = htons(PORT);			  // binds to PORT specified
+
+	// Binding newly created socket to given IP and verification
+	if ((bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
+	{
+		printf("socket bind failed...\n");
+		exit(0);
+	}
+	else
+		printf("Socket successfully binded..\n");
+
+	// Now server is ready to listen and verification
+	if ((listen(sockfd, 5)) != 0)
+	{
+		printf("Listen failed...\n");
+		exit(0);
+	}
+	else
+		printf("Server listening..\n");
+
+	len = sizeof(cli);
+
+	// Accept the data packet from client and verification
+	connfd = accept(sockfd, (struct sockaddr *)&cli, &len); // accepts connection from socket
+
+	if (connfd < 0)
+	{
+		printf("server acccept failed...\n");
+		exit(0);
+	}
+	else
+		printf("server acccept the client...\n");
+
+	// Function for chatting between client and server
+	sentFile(connfd);
+
+	// After transfer close the socket
+	close(sockfd);
 }
