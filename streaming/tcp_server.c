@@ -58,6 +58,9 @@ int main()
 	else
 		printf("Socket successfully created..\n");
 
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0)
+		printf("setsockopt(SO_REUSEADDR) failed");
+
 	// empty the
 	bzero(&servaddr, sizeof(servaddr));
 
