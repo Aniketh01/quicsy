@@ -16,7 +16,7 @@ void sentFile(int sockfd)
 {
 	char file_name[MAX], buff[MAX]; // for read operation from file and used to sent operation
 	int send_fd, read_len;
-	int exist;
+	int exist, ret;
 
 	memset(buff, 0x00, MAX);
 
@@ -34,7 +34,12 @@ void sentFile(int sockfd)
 		exist = -1;
 	}
 
-	send(sockfd, &exist, sizeof(exist), 0);
+	ret = send(sockfd, &exist, sizeof(exist), 0);
+
+	if (ret < 0)
+	{
+		printf("Failed to make aware(send) client if the file exists or not\n");
+	}
 
 	if (exist < 0)
 	{
@@ -42,7 +47,6 @@ void sentFile(int sockfd)
 		return;
 	}
 
-	//create file
 	send_fd = open(file_name, O_RDONLY); // open file uses both stdio and stdin header files
 
 	// file should be present at the program directory
@@ -56,7 +60,11 @@ void sentFile(int sockfd)
 	{
 		memset(buff, 0x00, MAX);
 		read_len = read(send_fd, buff, MAX);
-		send(sockfd, buff, read_len, 0);
+		ret = send(sockfd, buff, read_len, 0);
+		if (ret < 0)
+		{
+			printf("Failed to send data\n");
+		}
 		if (read_len == 0)
 		{
 			printf("File Sent successfully !!! \n");

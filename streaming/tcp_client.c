@@ -45,7 +45,7 @@ void recvFile(int sockfd, const char *filename)
 	}
 
 	recv_fd = open("recieved1.mp4", O_WRONLY | O_CREAT | O_TRUNC,
-				   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); // stores the file content in recieved.txt in the program directory
+				   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	if (!recv_fd)
 	{
@@ -57,7 +57,11 @@ void recvFile(int sockfd, const char *filename)
 	{
 		memset(buff, 0x00, MAX);
 		read_len = read(sockfd, buff, MAX);
-		write(recv_fd, buff, read_len);
+		ret = write(recv_fd, buff, read_len);
+		if (ret < 0)
+		{
+			printf("Failed to recieve/write data to the server\n");
+		}
 		if (read_len == 0)
 		{
 			printf("Download finish\n");
