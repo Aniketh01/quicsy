@@ -11,11 +11,24 @@
 #define MAX 1024
 #define PORT 8080
 
-void recvFile(int sockfd)
+void recvFile(int sockfd, const char *filename)
 {
 	char buff[MAX]; // to store message from client
+	int recv_fd, read_len, file_name_len;
+	int ret = 0;
 
-	int recv_fd, read_len;
+	// strcpy(filename_buff, filename);
+	file_name_len = strlen(filename) + 1;
+
+	printf("sending filename > %s with size > %d\n", filename, file_name_len);
+
+	ret = send(sockfd, filename, file_name_len, 0);
+	if (ret < 0)
+	{
+		printf("Failed to send filename\n");
+		return;
+	}
+
 	recv_fd = open("recieved1.mp4", O_WRONLY | O_CREAT | O_TRUNC,
 				   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); // stores the file content in recieved.txt in the program directory
 
@@ -42,10 +55,20 @@ void recvFile(int sockfd)
 	// printf("New File created is received.txt !! \n");
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	int sockfd, connfd;
 	struct sockaddr_in servaddr, cli;
+	const char *filename;
+
+	if (argc < 2)
+	{
+		printf("Usage: ./client filename\n");
+		return -1;
+	}
+
+	filename = strdup(argv[1]);
+	printf("file requested by client: %s\n", filename);
 
 	// socket create and varification
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -77,7 +100,7 @@ int main()
 		printf("connected to the server..\n");
 
 	// function for sending File
-	recvFile(sockfd);
+	recvFile(sockfd, filename);
 
 	// close the socket
 	close(sockfd);

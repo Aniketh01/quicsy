@@ -15,10 +15,22 @@
 void sentFile(int sockfd)
 {
 	char buff[MAX]; // for read operation from file and used to sent operation
-
-	// create file
 	int send_fd, read_len;
-	send_fd = open("/home/devbox/devel/quic_research/datasets/bbb_sunflower_1080p_60fps_normal.mp4", O_RDONLY); // open file uses both stdio and stdin header files
+
+	char file_name[MAX];
+	memset(buff, 0x00, MAX);
+
+	read_len = read(sockfd, buff, MAX);
+	if (read_len == 0)
+	{
+		return;
+	}
+
+	strcpy(file_name, buff);
+	printf("Filename recieved > %s", file_name);
+
+	//create file
+	send_fd = open(file_name, O_RDONLY); // open file uses both stdio and stdin header files
 
 	// file should be present at the program directory
 
