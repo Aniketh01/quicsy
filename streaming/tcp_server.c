@@ -14,10 +14,10 @@
 
 void sentFile(int sockfd)
 {
-	char buff[MAX]; // for read operation from file and used to sent operation
+	char file_name[MAX], buff[MAX]; // for read operation from file and used to sent operation
 	int send_fd, read_len;
+	int exist;
 
-	char file_name[MAX];
 	memset(buff, 0x00, MAX);
 
 	read_len = read(sockfd, buff, MAX);
@@ -27,16 +27,28 @@ void sentFile(int sockfd)
 	}
 
 	strcpy(file_name, buff);
-	printf("Filename recieved > %s", file_name);
+	printf("File requested > %s\n", file_name);
+
+	if (access(file_name, F_OK) < 0)
+	{
+		exist = -1;
+	}
+
+	send(sockfd, &exist, sizeof(exist), 0);
+
+	if (exist < 0)
+	{
+		printf("%s doesn't exist in server\n", file_name);
+		return;
+	}
 
 	//create file
 	send_fd = open(file_name, O_RDONLY); // open file uses both stdio and stdin header files
 
 	// file should be present at the program directory
-
 	if (!send_fd)
 	{
-		printf("Error IN Opening File .. \n");
+		printf("Error in opening File\n");
 		return;
 	}
 
@@ -47,11 +59,10 @@ void sentFile(int sockfd)
 		send(sockfd, buff, read_len, 0);
 		if (read_len == 0)
 		{
+			printf("File Sent successfully !!! \n");
 			break;
 		}
 	}
-
-	printf("File Sent successfully !!! \n");
 }
 
 int main()

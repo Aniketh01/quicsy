@@ -16,6 +16,7 @@ void recvFile(int sockfd, const char *filename)
 	char buff[MAX]; // to store message from client
 	int recv_fd, read_len, file_name_len;
 	int ret = 0;
+	int exist;
 
 	// strcpy(filename_buff, filename);
 	file_name_len = strlen(filename) + 1;
@@ -26,6 +27,20 @@ void recvFile(int sockfd, const char *filename)
 	if (ret < 0)
 	{
 		printf("Failed to send filename\n");
+		return;
+	}
+
+	ret = read(sockfd, &exist, sizeof(exist));
+	if (ret < 0)
+	{
+		printf("Failed to receive data about file existence\n");
+	}
+
+	//printf("Value of exits in client > %d\n", ntohl(exist));
+
+	if (exist < 0)
+	{
+		printf("Failed: File doesn't exist at the server\n");
 		return;
 	}
 
@@ -46,13 +61,10 @@ void recvFile(int sockfd, const char *filename)
 		if (read_len == 0)
 		{
 			printf("Download finish\n");
+			printf("File received successfully!!\n");
 			break;
 		}
 	}
-	// fprintf(fp,"%s",buff);
-
-	printf("File received successfully !! \n");
-	// printf("New File created is received.txt !! \n");
 }
 
 int main(int argc, char *argv[])
