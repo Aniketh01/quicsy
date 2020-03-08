@@ -12,22 +12,55 @@
 
 void dbg_log(const char *fmt, ...)
 {
-    va_list args;
-    fprintf( stdout, "LOG: " );
-    va_start( args, fmt );
-    vfprintf( stdout, fmt, args );
-    va_end( args );
-    fprintf( stdout, "\n" );
+	va_list args;
+	fprintf(stdout, "LOG: ");
+	va_start(args, fmt);
+	vfprintf(stdout, fmt, args);
+	va_end(args);
+	fprintf(stdout, "\n");
 }
 
 void err_log(const char *fmt, ...)
 {
-    va_list args;
-    fprintf( stderr, "ERROR: " );
-    va_start( args, fmt );
-    vfprintf( stderr, fmt, args );
-    va_end( args );
-    fprintf( stderr, "\n" );
+	va_list args;
+	fprintf(stderr, "ERROR: ");
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+	fprintf(stderr, "\n");
+}
+
+void packet_dump(AVPacket *packet)
+{
+	fprintf(stderr, "------------------------------------------------\n");
+	fprintf(stderr, "packet->pts %ld\n", packet->pts);
+	fprintf(stderr, "packet->dts %ld\n", packet->dts);
+	fprintf(stderr, "packet->size %d\n", packet->size);
+	fprintf(stderr, "packet->stream_index %d\n", packet->stream_index);
+	fprintf(stderr, "packet->flags %d\n", packet->flags);
+	fprintf(stderr, "packet->duration %d\n", packet->duration);
+	fprintf(stderr, "packet->pos %ld\n", packet->pos);
+	fprintf(stderr, "packet->convergence_duration %ld\n", packet->convergence_duration);
+	fprintf(stderr, "------------------------------------------------\n");
+}
+
+void frame_dump(AVFrame *frame)
+{
+	fprintf(stderr, "++++++++++++++++++++++++++++++++++++++++++++++++\n");
+	fprintf(stderr, "frame->key_frame %d\n", frame->key_frame);
+	fprintf(stderr, "frame->pict_type %c\n", av_get_picture_type_char(frame->pict_type));
+	fprintf(stderr, "frame->pts %ld\n", frame->pts);
+	fprintf(stderr, "frame->coded_picture_number %d\n", frame->coded_picture_number);
+	fprintf(stderr, "frame->display_picture_number %d\n", frame->display_picture_number);
+	fprintf(stderr, "frame->quality %d\n", frame->quality);
+	fprintf(stderr, "frame->pkt_pts %ld\n", frame->pkt_pts);
+	fprintf(stderr, "frame->pkt_dts %ld\n", frame->pkt_dts);
+	fprintf(stderr, "frame->best_effort_timestamp %ld\n", frame->best_effort_timestamp);
+	fprintf(stderr, "frame->pkt_pos %ld\n", frame->pkt_pos);
+	fprintf(stderr, "frame->width %d\n", frame->width);
+	fprintf(stderr, "frame->height %d\n", frame->height);
+	fprintf(stderr, "frame->format %d\n", frame->format);
+	fprintf(stderr, "++++++++++++++++++++++++++++++++++++++++++++++++\n");
 }
 
 void log_packet(const AVFormatContext *fmt_ctx, const AVPacket *pkt)
