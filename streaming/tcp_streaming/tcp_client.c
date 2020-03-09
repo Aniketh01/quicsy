@@ -1,15 +1,4 @@
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-
-#define MAX 1024
-#define PORT 8080
+#include "tcp.h"
 
 void recvFile(int sockfd, const char *filename)
 {
@@ -71,19 +60,11 @@ void recvFile(int sockfd, const char *filename)
 	}
 }
 
-int main(int argc, char *argv[])
+int run_tcp_client(const char *filename)
 {
 	int sockfd, connfd;
 	struct sockaddr_in servaddr, cli;
-	const char *filename;
 
-	if (argc < 2)
-	{
-		printf("Usage: ./client filename\n");
-		return -1;
-	}
-
-	filename = strdup(argv[1]);
 	printf("file requested by client: %s\n", filename);
 
 	// socket create and varification

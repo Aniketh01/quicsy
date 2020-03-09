@@ -1,16 +1,4 @@
-#include <stdlib.h> // for basic memmory allocation and deallocation
-#include <stdio.h>	// for file read and write
-#include <netdb.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <unistd.h>
-
-#define MAX 1024
-#define PORT 8080
+#include "tcp.h"
 
 void sentFile(int sockfd)
 {
