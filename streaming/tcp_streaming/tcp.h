@@ -20,6 +20,6 @@
 #define PORT 8080
 
 // TCP client API
-int run_tcp_client(const char *filename);
+int run_tcp_client(const char *filename, const char *infilename);
 
 #endif

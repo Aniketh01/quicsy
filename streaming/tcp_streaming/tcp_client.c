@@ -1,6 +1,6 @@
 #include "tcp.h"
 
-void recvFile(int sockfd, const char *filename)
+void recvFile(int sockfd, const char *infilename, const char *outfilename)
 {
 	char buff[MAX]; // to store message from client
 	int recv_fd, read_len, file_name_len;
@@ -8,11 +8,11 @@ void recvFile(int sockfd, const char *filename)
 	int exist;
 
 	// strcpy(filename_buff, filename);
-	file_name_len = strlen(filename) + 1;
+	file_name_len = strlen(infilename) + 1;
 
-	printf("sending filename > %s with size > %d\n", filename, file_name_len);
+	printf("sending filename > %s with size > %d\n", infilename, file_name_len);
 
-	ret = send(sockfd, filename, file_name_len, 0);
+	ret = send(sockfd, infilename, file_name_len, 0);
 	if (ret < 0)
 	{
 		printf("Failed to send filename\n");
@@ -33,7 +33,7 @@ void recvFile(int sockfd, const char *filename)
 		return;
 	}
 
-	recv_fd = open("recieved1.mp4", O_WRONLY | O_CREAT | O_TRUNC,
+	recv_fd = open(outfilename, O_WRONLY | O_CREAT | O_TRUNC,
 				   S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	if (!recv_fd)
@@ -60,12 +60,12 @@ void recvFile(int sockfd, const char *filename)
 	}
 }
 
-int run_tcp_client(const char *filename)
+int run_tcp_client(const char *infilename, const char * outfilename)
 {
 	int sockfd, connfd;
 	struct sockaddr_in servaddr, cli;
 
-	printf("file requested by client: %s\n", filename);
+	printf("file requested by client: %s\n", infilename);
 
 	// socket create and varification
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -97,7 +97,7 @@ int run_tcp_client(const char *filename)
 		printf("connected to the server..\n");
 
 	// function for sending File
-	recvFile(sockfd, filename);
+	recvFile(sockfd, infilename, outfilename);
 
 	// close the socket
 	close(sockfd);

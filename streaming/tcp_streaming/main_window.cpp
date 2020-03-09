@@ -2,14 +2,30 @@
 #include <GLFW/glfw3.h>
 
 #include "decoder.h"
+extern "C" {
+	#include "tcp.h"
+}
 
 int main(int argc, const char** argv) {
-    GLFWwindow* window;
 
-    if (!glfwInit()) {
+	if (argc < 2)
+	{
+		printf("Usage: ./client filename\n");
+		return -1;
+	}
+
+	if (!glfwInit()) {
         err_log("Couldn't init GLFW");
         return 1;
     }
+
+	GLFWwindow *window;
+	const char *infilename = strdup(argv[1]);
+	const char *outfilename = strdup("output.mp4");
+
+	// Should start download before preparing the window.
+	// TODO: Synchronise the download and playback.
+	run_tcp_client(infilename, outfilename);
 
     window = glfwCreateWindow(1280, 720, "QUIC streamer", NULL, NULL);
     if (!window) {
@@ -18,7 +34,7 @@ int main(int argc, const char** argv) {
     }
 
     decoder_t dec;
-    if (!quicsy_decoder_open(&dec, argv[1])) {
+    if (!quicsy_decoder_open(&dec, outfilename)) {
         err_log("Couldn't open video file");
         return 1;
     }
@@ -90,5 +106,10 @@ int main(int argc, const char** argv) {
 
     quicsy_decoder_close(&dec);
 
-    return 0;
+	if (remove(outfilename) < 0)
+	{
+		printf("Unable to delete file");
+	}
+
+	return 0;
 }
