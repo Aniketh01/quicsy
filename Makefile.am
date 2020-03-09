@@ -9,6 +9,8 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 # Using Makefile as a script isn't what it is meant for. 
 streamer:
 	cc streaming/main_window.cpp streaming/decoder.cpp -lstdc++ -lavcodec -lavformat -lavutil -lswresample -lswscale -lglfw -lGL -o bin/player
+tcp_streaming:
+	cc streaming/tcp_streaming/main_window.cpp streaming/tcp_streaming/decoder.cpp streaming/tcp_streaming/tcp_client.c -lstdc++ -lavcodec -lavformat -lavutil -lswresample -lswscale -lglfw -lGL -o bin/tcp_player && cc streaming/tcp_streaming/tcp_server.c -o tcp_server
 transcoder:
 	cc streaming/transcoder.c streaming/debug.c -lstdc++ -lavcodec -lavformat -lavutil -lswresample -lswscale -lglfw -lGL -o bin/transcoder
 
