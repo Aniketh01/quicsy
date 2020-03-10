@@ -3,6 +3,11 @@
 
 #include "decoder.h"
 
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
+
 int main(int argc, const char **argv)
 {
 	GLFWwindow *window;
@@ -46,6 +51,8 @@ int main(int argc, const char **argv)
 	const int frame_width = dec.width;
 	const int frame_height = dec.height;
 	uint8_t *frame_data = new uint8_t[frame_width * frame_height * 4];
+
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	while (!glfwWindowShouldClose(window))
 	{
