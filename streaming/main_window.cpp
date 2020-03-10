@@ -8,6 +8,12 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+void processExitInput(GLFWwindow *window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+}
+
 int main(int argc, const char **argv)
 {
 	GLFWwindow *window;
@@ -56,6 +62,7 @@ int main(int argc, const char **argv)
 
 	while (!glfwWindowShouldClose(window))
 	{
+		processExitInput(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Set up orphographic projection
