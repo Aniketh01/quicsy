@@ -110,5 +110,7 @@ int main(int argc, const char **argv)
 
 	quicsy_decoder_close(&dec);
 
+	glfwTerminate();
+
 	return 0;
 }
