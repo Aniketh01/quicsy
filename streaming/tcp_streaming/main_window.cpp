@@ -4,6 +4,7 @@
 #include "decoder.h"
 extern "C" {
 	#include "tcp.h"
+	#include <libgen.h>
 }
 
 int main(int argc, const char** argv) {
@@ -20,12 +21,12 @@ int main(int argc, const char** argv) {
     }
 
 	GLFWwindow *window;
-	const char *infilename = strdup(argv[1]);
-	const char *outfilename = strdup("output.mp4");
+	char *path = strdupa(argv[1]);
+	const char *filename = basename(path);
 
 	// Should start download before preparing the window.
 	// TODO: Synchronise the download and playback.
-	run_tcp_client(infilename, outfilename);
+	run_tcp_client(path, filename);
 
     window = glfwCreateWindow(1280, 720, "QUIC streamer", NULL, NULL);
     if (!window) {
@@ -34,7 +35,7 @@ int main(int argc, const char** argv) {
     }
 
     decoder_t dec;
-    if (!quicsy_decoder_open(&dec, outfilename)) {
+    if (!quicsy_decoder_open(&dec, filename)) {
         err_log("Couldn't open video file");
         return 1;
     }
@@ -106,7 +107,7 @@ int main(int argc, const char** argv) {
 
     quicsy_decoder_close(&dec);
 
-	if (remove(outfilename) < 0)
+	if (remove(filename) < 0)
 	{
 		printf("Unable to delete file");
 	}
