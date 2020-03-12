@@ -77,7 +77,7 @@ int main(int argc, const char **argv)
 		if (!quicsy_decoder_read_frame(&dec, frame_data, &pts))
 		{
 			err_log("Couldn't load video frame\n");
-			return 1;
+			return false;
 		}
 
 		static bool first_frame = true;
@@ -116,7 +116,6 @@ int main(int argc, const char **argv)
 	}
 
 	quicsy_decoder_close(&dec);
-
 	glfwTerminate();
 
 	return 0;

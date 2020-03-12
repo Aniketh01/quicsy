@@ -106,9 +106,24 @@ bool quicsy_decoder_read_frame(decoder_t* dec, uint8_t* frame_buffer, int64_t* p
     auto& sws_scaler_ctx = dec->sws_scaler_ctx;
 
     // Decode one frame
-    int response;
-    while (av_read_frame(av_format_ctx, av_packet) >= 0) {
-        if (av_packet->stream_index != video_stream_index) {
+	int response;
+	bool finished = false;
+
+	while (!finished)
+	{
+		if (response = (av_read_frame(av_format_ctx, av_packet)) < 0)
+		{
+			if (response == AVERROR_EOF)
+			{
+				finished = true;
+			}
+			else
+			{
+				exit(0);
+			}
+		}
+
+		if (av_packet->stream_index != video_stream_index) {
 			log("AVPacket->pts %" PRId64, av_packet->pts);
             av_packet_unref(av_packet);
             continue;
@@ -125,7 +140,7 @@ bool quicsy_decoder_read_frame(decoder_t* dec, uint8_t* frame_buffer, int64_t* p
         if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
             av_packet_unref(av_packet);
             continue;
-        } else if (response < 0) {
+		} else if (response < 0) {
 			log("Error while receiving a frame from the decoder");
 			//FIXME: err_log("Error while receiving a frame from the decoder: %s", av_err2str(response));
 			return false;
@@ -133,9 +148,9 @@ bool quicsy_decoder_read_frame(decoder_t* dec, uint8_t* frame_buffer, int64_t* p
 
         av_packet_unref(av_packet);
         break;
-    }
+	}
 
-    *pts = av_frame->pts;
+	*pts = av_frame->pts;
 
 	// Set up sws scaler
 	if (!sws_scaler_ctx)

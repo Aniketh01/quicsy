@@ -13,7 +13,7 @@ typedef struct decoder_st {
     // Private internal state
     AVFormatContext* av_format_ctx = NULL;
     AVCodecContext* av_codec_ctx = NULL;
-    int video_stream_index = 0;
+    int video_stream_index = -1;
     AVFrame* av_frame = NULL;
     AVPacket* av_packet = NULL;
     SwsContext* sws_scaler_ctx = NULL;
