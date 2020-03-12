@@ -42,8 +42,9 @@ bool quicsy_decoder_open(decoder_t* dec, const char* filename) {
 		log("finding the proper decoder (CODEC)");
 
 		av_codec = avcodec_find_decoder(av_codec_params->codec_id);
-        if (!av_codec) {
-            continue;
+        if (av_codec == NULL) {
+			err_log("CODEC: couldn't find proper decoder");
+            break;
         }
         if (av_codec_params->codec_type == AVMEDIA_TYPE_VIDEO) {
             video_stream_index = i;
@@ -135,13 +136,16 @@ bool quicsy_decoder_read_frame(decoder_t* dec, uint8_t* frame_buffer, int64_t* p
     }
 
     *pts = av_frame->pts;
-    
-    // Set up sws scaler
-	sws_scaler_ctx = sws_getContext(width, height, av_codec_ctx->pix_fmt,
-									width, height, AV_PIX_FMT_RGB0,
-                                    SWS_BILINEAR, NULL, NULL, NULL);
 
-    if (!sws_scaler_ctx) {
+	// Set up sws scaler
+	if (!sws_scaler_ctx)
+	{
+		sws_scaler_ctx = sws_getContext(width, height, av_codec_ctx->pix_fmt,
+										width, height, AV_PIX_FMT_RGB0,
+										SWS_BILINEAR, NULL, NULL, NULL);
+	}
+
+	if (!sws_scaler_ctx) {
         printf("Couldn't initialize sw scaler\n");
         return false;
     }
