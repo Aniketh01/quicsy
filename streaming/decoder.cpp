@@ -42,8 +42,9 @@ bool quicsy_decoder_open(decoder_t* dec, const char* filename) {
 		log("finding the proper decoder (CODEC)");
 
 		av_codec = avcodec_find_decoder(av_codec_params->codec_id);
-        if (!av_codec) {
-            continue;
+        if (av_codec == NULL) {
+			err_log("CODEC: couldn't find proper decoder");
+            break;
         }
         if (av_codec_params->codec_type == AVMEDIA_TYPE_VIDEO) {
             video_stream_index = i;
@@ -105,9 +106,24 @@ bool quicsy_decoder_read_frame(decoder_t* dec, uint8_t* frame_buffer, int64_t* p
     auto& sws_scaler_ctx = dec->sws_scaler_ctx;
 
     // Decode one frame
-    int response;
-    while (av_read_frame(av_format_ctx, av_packet) >= 0) {
-        if (av_packet->stream_index != video_stream_index) {
+	int response;
+	bool finished = false;
+
+	while (!finished)
+	{
+		if (response = (av_read_frame(av_format_ctx, av_packet)) < 0)
+		{
+			if (response == AVERROR_EOF)
+			{
+				finished = true;
+			}
+			else
+			{
+				exit(0);
+			}
+		}
+
+		if (av_packet->stream_index != video_stream_index) {
 			log("AVPacket->pts %" PRId64, av_packet->pts);
             av_packet_unref(av_packet);
             continue;
@@ -124,7 +140,7 @@ bool quicsy_decoder_read_frame(decoder_t* dec, uint8_t* frame_buffer, int64_t* p
         if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
             av_packet_unref(av_packet);
             continue;
-        } else if (response < 0) {
+		} else if (response < 0) {
 			log("Error while receiving a frame from the decoder");
 			//FIXME: err_log("Error while receiving a frame from the decoder: %s", av_err2str(response));
 			return false;
@@ -132,16 +148,19 @@ bool quicsy_decoder_read_frame(decoder_t* dec, uint8_t* frame_buffer, int64_t* p
 
         av_packet_unref(av_packet);
         break;
-    }
+	}
 
-    *pts = av_frame->pts;
-    
-    // Set up sws scaler
-	sws_scaler_ctx = sws_getContext(width, height, av_codec_ctx->pix_fmt,
-									width, height, AV_PIX_FMT_RGB0,
-                                    SWS_BILINEAR, NULL, NULL, NULL);
+	*pts = av_frame->pts;
 
-    if (!sws_scaler_ctx) {
+	// Set up sws scaler
+	if (!sws_scaler_ctx)
+	{
+		sws_scaler_ctx = sws_getContext(width, height, av_codec_ctx->pix_fmt,
+										width, height, AV_PIX_FMT_RGB0,
+										SWS_BILINEAR, NULL, NULL, NULL);
+	}
+
+	if (!sws_scaler_ctx) {
         printf("Couldn't initialize sw scaler\n");
         return false;
     }
