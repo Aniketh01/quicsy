@@ -132,7 +132,7 @@ float get_duration(char *dur)
 int main(int argc, char **argv)
 {
     xmlDoc *document;
-    manifest *m = {0};
+    manifest m[] = {0};
     xmlNode *root, *first_child, *node, *second_child, *node2, *third_child, *node3;
     xmlAttr *attribute;
     char duration[25] = "\0";
