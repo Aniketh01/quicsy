@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 {
     xmlDoc *document;
     manifest m[] = {0};
-    xmlNode *root, *first_child, *node, *second_child, *node2, *third_child, *node3;
+    xmlNode *root, *first_child, *node, *second_child, *node2, *third_child, *node3, *node4, *fourth_child;
     xmlAttr *attribute;
     char duration[25] = "\0";
     float dur, segdur = 0, timescale = 0;
@@ -197,59 +197,67 @@ int main(int argc, char **argv)
                 if (xmlStrcmp(node2->name, (const xmlChar *)"AdaptationSet") == 0)
                 {
                     third_child = node2->children;
-                    for (node3 = third_child; node3; node3 = node3->next)
+                    for (node4 = third_child; node4; node4 = node4->next)
                     {
-                        if (xmlStrcmp(node3->name, (const xmlChar *)"SegmentTemplate") == 0)
+                        fprintf(stdout, "\t\t Child is <%s> (%i)\n", node4->name, node4->type);
+                        if (xmlStrcmp(node4->name, (const xmlChar *)"Representation") == 0)
                         {
-                            fprintf(stdout, "\t\t Child is <%s> (%i)\n", node3->name, node3->type);
-                            attribute = node3->properties;
-                            while (attribute)
+                            fourth_child = node4->children;
+                            for (node3 = fourth_child; node3; node3 = node3->next)
                             {
-                                fprintf(stdout, ">>>>>>>>>>>>>>>>%s\n", (char *)attribute->name);
-                                if (xmlStrcmp(attribute->name, (const xmlChar *)"duration") == 0)
+                                if (xmlStrcmp(node3->name, (const xmlChar *)"SegmentTemplate") == 0)
                                 {
-                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                                    segdur = atoi((char *)value);
-                                    xmlFree(value);
-                                }
-                                else if (xmlStrcmp(attribute->name, (const xmlChar *)"timescale") == 0)
-                                {
-                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                                    timescale = atoi((char *)value);
-                                    xmlFree(value);
-                                }
-                                else if (xmlStrcmp(attribute->name, (const xmlChar *)"startNumber") == 0)
-                                {
-                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                                    sn = atoi((char *)value);
-                                    xmlFree(value);
-                                }
-                                else if (xmlStrcmp(attribute->name, (const xmlChar *)"initialization") == 0 || xmlStrcmp(attribute->name, (const xmlChar *)"index") == 0)
-                                {
-                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                                    strcpy(init_url_template, base_url);
-                                    strcat(init_url_template, (char *)value);
-                                    fprintf(stdout, "Init_url being filled here!!! %s (%s)\n", init_url_template, (char *)value);
-                                    fflush(stdout);
-                                    xmlFree(value);
-                                }
-                                else if (xmlStrcmp(attribute->name, (const xmlChar *)"media") == 0)
-                                {
-                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                                    strcpy(media_url_template, base_url);
-                                    strcat(media_url_template, (char *)value);
-                                    fprintf(stdout, "Media_url is %s \n", media_url_template);
-                                    xmlFree(value);
-                                }
+                                    fprintf(stdout, "\t\t Child is <%s> (%i)\n", node3->name, node3->type);
+                                    attribute = node3->properties;
+                                    while (attribute)
+                                    {
+                                        fprintf(stdout, ">>>>>>>>>>>>>>>>%s\n", (char *)attribute->name);
+                                        if (xmlStrcmp(attribute->name, (const xmlChar *)"duration") == 0)
+                                        {
+                                            xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                            segdur = atoi((char *)value);
+                                            xmlFree(value);
+                                        }
+                                        else if (xmlStrcmp(attribute->name, (const xmlChar *)"timescale") == 0)
+                                        {
+                                            xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                            timescale = atoi((char *)value);
+                                            xmlFree(value);
+                                        }
+                                        else if (xmlStrcmp(attribute->name, (const xmlChar *)"startNumber") == 0)
+                                        {
+                                            xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                            sn = atoi((char *)value);
+                                            xmlFree(value);
+                                        }
+                                        else if (xmlStrcmp(attribute->name, (const xmlChar *)"initialization") == 0 || xmlStrcmp(attribute->name, (const xmlChar *)"index") == 0)
+                                        {
+                                            xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                            strcpy(init_url_template, base_url);
+                                            strcat(init_url_template, (char *)value);
+                                            fprintf(stdout, "Init_url being filled here!!! %s (%s)\n", init_url_template, (char *)value);
+                                            fflush(stdout);
+                                            xmlFree(value);
+                                        }
+                                        else if (xmlStrcmp(attribute->name, (const xmlChar *)"media") == 0)
+                                        {
+                                            xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                            strcpy(media_url_template, base_url);
+                                            strcat(media_url_template, (char *)value);
+                                            fprintf(stdout, "Media_url is %s \n", media_url_template);
+                                            xmlFree(value);
+                                        }
 
-                                attribute = attribute->next;
+                                        attribute = attribute->next;
+                                    }
+
+                                    if (strlen(init_url_template) > 0)
+                                        m->init = 1;
+                                    else
+                                        m->init = 0;
+                                    m->num_of_segments = ceil(dur / (segdur / timescale)) + m->init;
+                                }
                             }
-
-                            if (strlen(init_url_template) > 0)
-                                m->init = 1;
-                            else
-                                m->init = 0;
-                            m->num_of_segments = ceil(dur / (segdur / timescale)) + m->init;
                         }
                     }
 
@@ -306,7 +314,7 @@ int main(int argc, char **argv)
             }
             else
             {
-                //printdebug(READMPD,"Replaced bandwidth \n");
+                fprintf(stdout,"Replaced bandwidth \n");
                 strcpy(next_level->segments[0], newurl);
                 free(newurl);
             }
@@ -363,7 +371,7 @@ int main(int argc, char **argv)
                 }
                 free(tmp);
             }
-            fprintf(stdout, "%s\n", next_level->segments[k]);
+            // fprintf(stdout, "%s\n", next_level->segments[k]);
         }
     }
 
