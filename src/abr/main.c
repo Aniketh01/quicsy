@@ -17,52 +17,53 @@ typedef struct
     char **segments;
 } level;
 
-
 typedef struct
 {
     /*DASH params*/
     int num_of_segments;
     int num_of_levels;
     int segment_dur_ms;
-    uint8_t init; /*boolean - init segment (with no media data) exists or not*/ 
+    uint8_t init; /*boolean - init segment (with no media data) exists or not*/
     level bitrate_level[MAX_SUPPORTED_BITRATE_LEVELS];
-    
-}manifest;
+
+} manifest;
 
 /*http://stackoverflow.com/questions/779875/what-is-the-function-to-replace-string-in-c
  * Function returns NULL when there is no replacement to be made.
  */
 
-char *str_replace(char *orig, char *rep, char *with) {
-    char *result; // the return string
-    char *ins;    // the next insert point
-    char *tmp;    // varies
-    int len_rep;  // length of rep
-    int len_with; // length of with
+char *str_replace(char *orig, char *rep, char *with)
+{
+    char *result;  // the return string
+    char *ins;     // the next insert point
+    char *tmp;     // varies
+    int len_rep;   // length of rep
+    int len_with;  // length of with
     int len_front; // distance between rep and end of last rep
-    int count;    // number of replacements
-//	cout<<"woah boy replacing "<<rep<<" with "<<with;
+    int count;     // number of replacements
+                   //	cout<<"woah boy replacing "<<rep<<" with "<<with;
 
     if (!orig)
     {
-       // printf(" not found 1\n");
+        // printf(" not found 1\n");
         return NULL;
     }
     if (!rep || !(len_rep = strlen(rep)))
     {
-      //  printf(" not found 2 \n");
+        //  printf(" not found 2 \n");
         return NULL;
     }
     if (!(ins = strstr(orig, rep)))
     {
-       // printf(" not found 3\n");
+        // printf(" not found 3\n");
         return NULL;
     }
     if (!with)
         with[0] = '\0';
     len_with = strlen(with);
     tmp = strstr(ins, rep);
-    for (count = 0; tmp ; ++count) {
+    for (count = 0; tmp; ++count)
+    {
         ins = tmp + len_rep;
         tmp = strstr(ins, rep);
     }
@@ -76,10 +77,11 @@ char *str_replace(char *orig, char *rep, char *with) {
 
     if (!result)
     {
-    	//printf(" not found \n");
+        //printf(" not found \n");
         return NULL;
     }
-    while (count--) {
+    while (count--)
+    {
         ins = strstr(orig, rep);
         len_front = ins - orig;
         tmp = strncpy(tmp, orig, len_front) + len_front;
@@ -87,7 +89,7 @@ char *str_replace(char *orig, char *rep, char *with) {
         orig += len_front + len_rep; // move to next "end of rep"
     }
     strcpy(tmp, orig);
-//	cout<<" done "<<endl;
+    //	cout<<" done "<<endl;
 
     return result;
 }
@@ -138,7 +140,7 @@ int main(int argc, char **argv)
     char duration[25] = "\0";
     float dur, segdur = 0, timescale = 0;
     int num_of_rates = 0, height;
-    char            segnum[5];
+    char segnum[5];
     char bw[25] = "", repid[25] = "";
     char bandwidth[MAX_SUPPORTED_BITRATE_LEVELS][25];
     char id[MAX_SUPPORTED_BITRATE_LEVELS][5] = {{0}};
@@ -189,51 +191,65 @@ int main(int argc, char **argv)
                 attribute = attribute->next;
             }
             second_child = node->children;
-            for (node2 = second_child; node2; node2 = node2->next) {
+            for (node2 = second_child; node2; node2 = node2->next)
+            {
                 fprintf(stdout, "\t\t Child is <%s> (%i)\n", node2->name, node2->type);
-                if(xmlStrcmp(node2->name, (const xmlChar *) "AdaptationSet")==0) {
+                if (xmlStrcmp(node2->name, (const xmlChar *)"AdaptationSet") == 0)
+                {
                     third_child = node2->children;
-                    for (node3 = third_child; node3; node3 = node3->next) {
-                        if(xmlStrcmp(node3->name, (const xmlChar *) "SegmentTemplate")==0) {
+                    for (node3 = third_child; node3; node3 = node3->next)
+                    {
+                        if (xmlStrcmp(node3->name, (const xmlChar *)"SegmentTemplate") == 0)
+                        {
                             fprintf(stdout, "\t\t Child is <%s> (%i)\n", node3->name, node3->type);
                             attribute = node3->properties;
-                            while(attribute) {
+                            while (attribute)
+                            {
                                 fprintf(stdout, ">>>>>>>>>>>>>>>>%s\n", (char *)attribute->name);
-                                if(xmlStrcmp(attribute->name, (const xmlChar *) "duration")==0) {
-                                    xmlChar* value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                                    segdur=atoi((char *)value);
+                                if (xmlStrcmp(attribute->name, (const xmlChar *)"duration") == 0)
+                                {
+                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                    segdur = atoi((char *)value);
                                     xmlFree(value);
-                                } else if(xmlStrcmp(attribute->name, (const xmlChar *) "timescale")==0) {
-                                    xmlChar* value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                                    timescale=atoi((char *)value);
+                                }
+                                else if (xmlStrcmp(attribute->name, (const xmlChar *)"timescale") == 0)
+                                {
+                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                    timescale = atoi((char *)value);
                                     xmlFree(value);
-                                } else if(xmlStrcmp(attribute->name, (const xmlChar *) "startNumber")==0) {
-                                    xmlChar* value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                                    sn=atoi((char *)value);
+                                }
+                                else if (xmlStrcmp(attribute->name, (const xmlChar *)"startNumber") == 0)
+                                {
+                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                    sn = atoi((char *)value);
                                     xmlFree(value);
-                                } else if(xmlStrcmp(attribute->name, (const xmlChar *) "initialization")==0 
-                                        || xmlStrcmp(attribute->name, (const xmlChar *) "index")==0) {
-                                    xmlChar* value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                }
+                                else if (xmlStrcmp(attribute->name, (const xmlChar *)"initialization") == 0 || xmlStrcmp(attribute->name, (const xmlChar *)"index") == 0)
+                                {
+                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
                                     strcpy(init_url_template, base_url);
                                     strcat(init_url_template, (char *)value);
-                                    fprintf(stdout, "Init_url being filled here!!! %s (%s)\n", init_url_template, (char *)value); fflush(stdout);
+                                    fprintf(stdout, "Init_url being filled here!!! %s (%s)\n", init_url_template, (char *)value);
+                                    fflush(stdout);
                                     xmlFree(value);
-                                } else if(xmlStrcmp(attribute->name, (const xmlChar *) "media")==0) {
-                                    xmlChar* value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                }
+                                else if (xmlStrcmp(attribute->name, (const xmlChar *)"media") == 0)
+                                {
+                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
                                     strcpy(media_url_template, base_url);
-                                    strcat(media_url_template, (char *) value);
-                                    fprintf(stdout,"Media_url is %s \n", media_url_template);
+                                    strcat(media_url_template, (char *)value);
+                                    fprintf(stdout, "Media_url is %s \n", media_url_template);
                                     xmlFree(value);
                                 }
 
                                 attribute = attribute->next;
                             }
 
-                            if (strlen(init_url_template)>0)
-                    			m->init = 1; 
-		                    else 
-                                m->init = 0; 
-                            m->num_of_segments = ceil(dur/(segdur/timescale)) + m->init;
+                            if (strlen(init_url_template) > 0)
+                                m->init = 1;
+                            else
+                                m->init = 0;
+                            m->num_of_segments = ceil(dur / (segdur / timescale)) + m->init;
                         }
                     }
 
@@ -247,7 +263,8 @@ int main(int argc, char **argv)
                     fprintf(stdout, "Timescale : %f, Seg duration : %f\n", timescale, segdur);
                     fprintf(stdout, "Number of Segments = %d\n", m->num_of_segments);
                     num_of_rates++;
-                    if(num_of_rates>=MAX_SUPPORTED_BITRATE_LEVELS) {
+                    if (num_of_rates >= MAX_SUPPORTED_BITRATE_LEVELS)
+                    {
                         fprintf(stdout, "Number of rate levels exceeds the maximum allowed value\n");
                         return -1;
                     }
@@ -255,30 +272,31 @@ int main(int argc, char **argv)
             }
         }
     }
-    if( m->num_of_segments < 0) {
+    if (m->num_of_segments < 0)
+    {
         fprintf(stdout, "Number of rate levels / segments is negative, check mpd. \n");
         return -1;
     }
     m->num_of_levels = num_of_rates;
-    m->segment_dur_ms = (segdur/timescale);
+    m->segment_dur_ms = (segdur / timescale);
 
     int j, k;
-        for (j = 0; j < num_of_rates; j++)
+    for (j = 0; j < num_of_rates; j++)
     {
-        level * next_level = &m->bitrate_level[j];
-        next_level->segments = (char **) malloc (m->num_of_segments * sizeof(char *));
-        
-        for (k = 0; k < m->num_of_segments ; k++)
-            next_level->segments[k] = (char *)malloc ( MAXURLLENGTH * sizeof (char));
-        
+        level *next_level = &m->bitrate_level[j];
+        next_level->segments = (char **)malloc(m->num_of_segments * sizeof(char *));
+
+        for (k = 0; k < m->num_of_segments; k++)
+            next_level->segments[k] = (char *)malloc(MAXURLLENGTH * sizeof(char));
+
         next_level->bitrate = atoi(bandwidth[j]);
-        if( strlen(init_url[j])!=0)
-	    {
+        if (strlen(init_url[j]) != 0)
+        {
             newurl = str_replace(init_url[j], keyword_bw, bandwidth[j]);
-            if(newurl == NULL)
+            if (newurl == NULL)
             {
                 newurl = str_replace(init_url[j], keyword_id, id[j]);
-                if(newurl == NULL)
+                if (newurl == NULL)
                     strcpy(next_level->segments[0], init_url[j]);
                 else
                 {
@@ -294,19 +312,19 @@ int main(int argc, char **argv)
             }
         }
 
-	    sn = startNumber[j];
+        sn = startNumber[j];
         for (k = m->init; k < m->num_of_segments; k++)
         {
-            sprintf(segnum,"%d", sn);
-            sn++; 
+            sprintf(segnum, "%d", sn);
+            sn++;
             tmp = str_replace(media_url[j], keyword_bw, bandwidth[j]);
-            if ( tmp == NULL )
+            if (tmp == NULL)
             {
                 tmp = str_replace(media_url[j], keyword_id, id[j]);
-                if(tmp == NULL)
+                if (tmp == NULL)
                 {
                     newurl = str_replace(media_url[j], keyword_num, segnum);
-                    if(newurl == NULL)
+                    if (newurl == NULL)
                     {
                         strcpy(next_level->segments[k], media_url[j]);
                     }
@@ -319,7 +337,7 @@ int main(int argc, char **argv)
                 else
                 {
                     newurl = str_replace(tmp, keyword_num, segnum);
-                    if(newurl == NULL)
+                    if (newurl == NULL)
                     {
                         strcpy(next_level->segments[k], tmp);
                     }
@@ -334,7 +352,7 @@ int main(int argc, char **argv)
             else
             {
                 newurl = str_replace(tmp, keyword_num, segnum);
-                if(newurl == NULL)
+                if (newurl == NULL)
                 {
                     strcpy(next_level->segments[k], tmp);
                 }
@@ -346,7 +364,6 @@ int main(int argc, char **argv)
                 free(tmp);
             }
             fprintf(stdout, "%s\n", next_level->segments[k]);
-
         }
     }
 
