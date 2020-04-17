@@ -167,7 +167,7 @@ int main(int argc, char **argv)
     document = xmlReadFile(filename, NULL, 0);
     root = xmlDocGetRootElement(document);
 
-    fprintf(stdout, "Root is <%s> (%i)\n", root->name, root->name);
+    fprintf(stdout, "Root is <%s> (%i)\n", root->name, root->type);
 
     first_child = root->children;
     for (node = first_child; node; node = node->next)
