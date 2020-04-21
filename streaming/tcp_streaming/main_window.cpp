@@ -36,7 +36,7 @@ int main(int argc, const char** argv) {
 
     decoder_t dec;
     if (!quicsy_decoder_open(&dec, filename)) {
-        err_log("Couldn't open video file");
+        err_log("Main Window: Couldn't open video file");
         return 1;
     }
 	log("opening the input file (%s) and loading format (container) header", argv[1]);

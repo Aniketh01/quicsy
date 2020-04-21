@@ -12,6 +12,8 @@ bool quicsy_decoder_open(decoder_t* dec, const char* filename) {
     auto& av_frame = dec->av_frame;
     auto& av_packet = dec->av_packet;
 
+    av_register_all();
+
     // Open the file using libavformat
     av_format_ctx = avformat_alloc_context();
     if (!av_format_ctx) {
@@ -20,7 +22,7 @@ bool quicsy_decoder_open(decoder_t* dec, const char* filename) {
     }
 
     if (avformat_open_input(&av_format_ctx, filename, NULL, NULL) != 0) {
-        err_log("Couldn't open video file");
+        err_log("Decoder: Couldn't open video file");
         return false;
     }
 
