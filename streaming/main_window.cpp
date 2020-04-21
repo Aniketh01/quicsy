@@ -27,7 +27,7 @@ int main(int argc, const char **argv)
 	window = glfwCreateWindow(1280, 720, "QUIC streamer", NULL, NULL);
 	if (window == NULL)
 	{
-		err_log("Couldn't open window");
+		err_log("Window: Couldn't open window");
 		glfwTerminate();
 		return 1;
 	}
