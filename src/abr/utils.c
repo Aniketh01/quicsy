@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "utils.h"
 
 /*http://stackoverflow.com/questions/779875/what-is-the-function-to-replace-string-in-c
