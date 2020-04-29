@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MPD file Generated with GPAC version 0.5.1-DEV-rev5379  on 2014-09-10T13:14:57Z-->
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" minBufferTime="PT1.500000S" type="static" mediaPresentationDuration="PT0H0M55.46S" profiles="urn:mpeg:dash:profile:isoff-live:2011">
+  <Period duration="PT0H9M55.46S">
+    <AdaptationSet mimeType="video/mp4" segmentAlignment="true" startWithSAP="1">
+      <Representation bandwidth="47000" codecs="avc1.42c032" height="320" id="video.1" width="240">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/47/BigBuckBunny_1s_init.mp4" media="media/1000ms/47/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+      <Representation bandwidth="92000" codecs="avc1.42c032" height="320" id="video.1" width="240">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/92/BigBuckBunny_1s_init.mp4" media="media/1000ms/92/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>     
+      <Representation bandwidth="135000" codecs="avc1.42c032" height="320" id="video.1" width="240">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/135/BigBuckBunny_1s_init.mp4" media="media/1000ms/135/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation> 
+      <Representation bandwidth="182000" codecs="avc1.42c032" height="480" id="video.1" width="360">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/182/BigBuckBunny_1s_init.mp4" media="media/1000ms/182/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation> 
+      <Representation bandwidth="226000" codecs="avc1.42c032" height="480" id="video.1" width="360">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/226/BigBuckBunny_1s_init.mp4" media="media/1000ms/226/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation> 
+      <Representation bandwidth="270000" codecs="avc1.42c032" height="480" id="video.1" width="360">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/270/BigBuckBunny_1s_init.mp4" media="media/1000ms/270/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation> 
+      <Representation bandwidth="353000" codecs="avc1.42c032" height="480" id="video.1" width="360">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/353/BigBuckBunny_1s_init.mp4" media="media/1000ms/353/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation> 
+      <Representation bandwidth="425000" codecs="avc1.42c032" height="480" id="video.1" width="360">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/425/BigBuckBunny_1s_init.mp4" media="media/1000ms/425/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation> 
+      <Representation bandwidth="538000" codecs="avc1.42c032" height="854" id="video.1" width="480">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/538/BigBuckBunny_1s_init.mp4" media="media/1000ms/538/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation> 
+      <Representation bandwidth="621000" codecs="avc1.42c032" height="854" id="video.1" width="480">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/621/BigBuckBunny_1s_init.mp4" media="media/1000ms/621/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation> 
+      <Representation bandwidth="808000" codecs="avc1.42c032" height="1280" id="video.1" width="720">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/808/BigBuckBunny_1s_init.mp4" media="media/1000ms/808/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>        
+      <Representation bandwidth="1100000" codecs="avc1.42c032" height="1280" id="video.1" width="720">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/1100/BigBuckBunny_1s_init.mp4" media="media/1000ms/1100/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+	    </Representation>
+      <Representation bandwidth="1300000" codecs="avc1.42c032" height="1280" id="video.2" width="720">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/1300/BigBuckBunny_1s_init.mp4" media="media/1000ms/1300/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+      <Representation bandwidth="1700000" codecs="avc1.42c032" height="1280" id="video.3" width="720">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/1700/BigBuckBunny_1s_init.mp4" media="media/1000ms/1700/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+      <Representation bandwidth="2200000" codecs="avc1.42c032" height="1920" id="video.3" width="1080">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/2200/BigBuckBunny_1s_init.mp4" media="media/1000ms/2200/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+      <Representation bandwidth="2600000" codecs="avc1.42c032" height="1920" id="video.3" width="1080">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/2600/BigBuckBunny_1s_init.mp4" media="media/1000ms/2600/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+      <Representation bandwidth="3300000" codecs="avc1.42c032" height="1920" id="video.3" width="1080">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/3300/BigBuckBunny_1s_init.mp4" media="media/1000ms/3300/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+      <Representation bandwidth="3800000" codecs="avc1.42c032" height="1920" id="video.3" width="1080">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/3800/BigBuckBunny_1s_init.mp4" media="media/1000ms/3800/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+      <Representation bandwidth="4200000" codecs="avc1.42c032" height="1920" id="video.3" width="1080">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/4200/BigBuckBunny_1s_init.mp4" media="media/1000ms/4200/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+      <Representation bandwidth="4700000" codecs="avc1.42c032" height="1920" id="video.3" width="1080">
+        <SegmentTemplate duration="1000" initialization="media/1000ms/4700/BigBuckBunny_1s_init.mp4" media="media/1000ms/4700/BigBuckBunny_1s$Number%d$.m4s" startNumber="0" timescale="1000"/>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>
