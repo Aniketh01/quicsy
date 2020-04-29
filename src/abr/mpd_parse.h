@@ -31,5 +31,6 @@ typedef struct
 
 } manifest;
 
+int parse_mpd(char *filename, manifest *m);
 
 #endif

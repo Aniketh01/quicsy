@@ -2,10 +2,10 @@
 #include "utils.h"
 
 
-int main(int argc, char **argv)
+int parse_mpd(char *filename, manifest *m)
 {
     xmlDoc *document;
-    manifest m[] = {0};
+    // manifest m[] = {0};
     xmlNode *root, *first_child, *node, *second_child, *node2, *third_child, *node3, *node4, *fourth_child;
     xmlAttr *attribute;
     char duration[25] = "\0";
@@ -25,15 +25,6 @@ int main(int argc, char **argv)
     char keyword_id[12] = "$id$";
     char keyword_bw[12] = "$Bandwidth$";
     char keyword_num[12] = "$Number$";
-
-    char *filename;
-
-    if (argc < 2)
-    {
-        fprintf(stderr, "Usage: %s filename.xml\n", argv[0]);
-        return 1;
-    }
-    filename = argv[1];
 
     document = xmlReadFile(filename, NULL, 0);
     root = xmlDocGetRootElement(document);
