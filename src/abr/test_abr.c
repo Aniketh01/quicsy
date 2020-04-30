@@ -19,8 +19,9 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < media_manifest.num_of_levels ; i++)
     {
-        fprintf(stdout, " TEST: BITRATE LEVEL : %d (%d) Presenting 1st and last URL\n", media_manifest.bitrate_level[i].bitrate, i);
-        fprintf(stdout, " TEST: %s\n", media_manifest.bitrate_level[i].segments[i]);
+        fprintf(stdout, " TEST: BITRATE LEVEL : %ld (%d) Presenting 1st and last URL\n", media_manifest.bitrate_level[i].bitrate, i);
+        fprintf(stdout, " TEST: SEGMENTS: %s\n", media_manifest.bitrate_level[i].segments[i]);
+        fprintf(stdout, "TEST: SEGMENT DURATION: %d\n", media_manifest.segment_dur_ms);
         fprintf(stdout, " TEST: %s\n", media_manifest.bitrate_level[i].segments[media_manifest.num_of_segments-1]);
     }
 }

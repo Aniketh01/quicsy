@@ -1,7 +1,6 @@
 #include "mpd_parse.h"
 #include "utils.h"
 
-
 int parse_mpd(char *filename, manifest *m)
 {
     xmlDoc *document;
@@ -10,7 +9,7 @@ int parse_mpd(char *filename, manifest *m)
     xmlAttr *attribute;
     char duration[25] = "\0";
     float dur, segdur = 0, timescale = 0;
-    int num_of_rates = 0, height;
+    int num_of_rates = 0; //height;
     char segnum[5];
     char bw[25] = "", repid[25] = "";
     char bandwidth[MAX_SUPPORTED_BITRATE_LEVELS][25];
@@ -29,12 +28,12 @@ int parse_mpd(char *filename, manifest *m)
     document = xmlReadFile(filename, NULL, 0);
     root = xmlDocGetRootElement(document);
 
-    fprintf(stdout, "Root is <%s> (%i)\n", root->name, root->type);
+    //fprintf(stdout, "Root is <%s> (%i)\n", root->name, root->type);
 
     first_child = root->children;
     for (node = first_child; node; node = node->next)
     {
-        fprintf(stdout, "\t Child is <%s> (%i)\n", node->name, node->type);
+        //fprintf(stdout, "\t Child is <%s> (%i)\n", node->name, node->type);
         if (xmlStrcmp(node->name, (const xmlChar *)"Period") == 0)
         {
             attribute = node->properties;
@@ -43,8 +42,9 @@ int parse_mpd(char *filename, manifest *m)
                 if (xmlStrcmp(attribute->name, (const xmlChar *)"duration") == 0)
                 {
                     xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
-                    fprintf(stdout, "\t\t%s : %s\n", (char *)attribute->name, (char *)value);
+                    //fprintf(stdout, "\t\t%s : %s\n", (char *)attribute->name, (char *)value);
                     strcpy(duration, (char *)value);
+                    //TODO: Why is get_duration() function called twice here?
                     fprintf(stdout, "Duration is %s and %f\n", duration, dur = get_duration(duration));
                     get_duration(duration);
                     xmlFree(value);
@@ -55,25 +55,36 @@ int parse_mpd(char *filename, manifest *m)
             second_child = node->children;
             for (node2 = second_child; node2; node2 = node2->next)
             {
-                fprintf(stdout, "\t\t Child is <%s> (%i)\n", node2->name, node2->type);
+                //fprintf(stdout, "\t\t Child is <%s> (%i)\n", node2->name, node2->type);
                 if (xmlStrcmp(node2->name, (const xmlChar *)"AdaptationSet") == 0)
                 {
                     third_child = node2->children;
                     for (node4 = third_child; node4; node4 = node4->next)
                     {
-                        fprintf(stdout, "\t\t Child is <%s> (%i)\n", node4->name, node4->type);
+                        //fprintf(stdout, "\t\t Child is <%s> (%i)\n", node4->name, node4->type);
                         if (xmlStrcmp(node4->name, (const xmlChar *)"Representation") == 0)
                         {
                             fourth_child = node4->children;
+                            attribute = node4->properties;
+                            while (attribute)
+                            {
+                                if (xmlStrcmp(attribute->name, (const xmlChar *)"bandwidth") == 0)
+                                {
+                                    xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
+                                    strcpy(bw, (char *)value);
+                                    xmlFree(value);
+                                    break;
+                                }
+                            }
                             for (node3 = fourth_child; node3; node3 = node3->next)
                             {
                                 if (xmlStrcmp(node3->name, (const xmlChar *)"SegmentTemplate") == 0)
                                 {
-                                    fprintf(stdout, "\t\t Child is <%s> (%i)\n", node3->name, node3->type);
+                                    //fprintf(stdout, "\t\t Child is <%s> (%i)\n", node3->name, node3->type);
                                     attribute = node3->properties;
                                     while (attribute)
                                     {
-                                        fprintf(stdout, ">>>>>>>>>>>>>>>>%s\n", (char *)attribute->name);
+                                        //fprintf(stdout, ">>>>>>>>>>>>>>>>%s\n", (char *)attribute->name);
                                         if (xmlStrcmp(attribute->name, (const xmlChar *)"duration") == 0)
                                         {
                                             xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
@@ -97,7 +108,7 @@ int parse_mpd(char *filename, manifest *m)
                                             xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
                                             strcpy(init_url_template, base_url);
                                             strcat(init_url_template, (char *)value);
-                                            fprintf(stdout, "Init_url being filled here!!! %s (%s)\n", init_url_template, (char *)value);
+                                            //fprintf(stdout, "Init_url being filled here!!! %s (%s)\n", init_url_template, (char *)value);
                                             fflush(stdout);
                                             xmlFree(value);
                                         }
@@ -107,6 +118,17 @@ int parse_mpd(char *filename, manifest *m)
                                             strcpy(media_url_template, base_url);
                                             strcat(media_url_template, (char *)value);
                                             fprintf(stdout, "Media_url is %s \n", media_url_template);
+                                            strcpy(media_url[num_of_rates], media_url_template);
+                                            strcpy(init_url[num_of_rates], init_url_template);
+                                            strcpy(bandwidth[num_of_rates], bw);
+                                            strcpy(id[num_of_rates], repid);
+                                            startNumber[num_of_rates] = sn;
+                                            fprintf(stdout, "Init segment : %s\n", init_url[num_of_rates]);
+                                            fprintf(stdout, "Media segment : %s\n", media_url[num_of_rates]);
+                                            fprintf(stdout, "Timescale : %.0f, Seg duration : %.0f\n", timescale, segdur);
+                                            fprintf(stdout, "Number of Segments = %d\n", m->num_of_segments);
+                                            fprintf(stdout, "\t bw: %s\n\n", bandwidth[num_of_rates]);
+                                            num_of_rates++;
                                             xmlFree(value);
                                         }
 
@@ -123,16 +145,6 @@ int parse_mpd(char *filename, manifest *m)
                         }
                     }
 
-                    strcpy(media_url[num_of_rates], media_url_template);
-                    strcpy(init_url[num_of_rates], init_url_template);
-                    strcpy(bandwidth[num_of_rates], bw);
-                    strcpy(id[num_of_rates], repid);
-                    startNumber[num_of_rates] = sn;
-                    fprintf(stdout, "Init segment : %s\n", init_url[num_of_rates]);
-                    fprintf(stdout, "Media segment : %s\n", media_url[num_of_rates]);
-                    fprintf(stdout, "Timescale : %f, Seg duration : %f\n", timescale, segdur);
-                    fprintf(stdout, "Number of Segments = %d\n", m->num_of_segments);
-                    num_of_rates++;
                     if (num_of_rates >= MAX_SUPPORTED_BITRATE_LEVELS)
                     {
                         fprintf(stdout, "Number of rate levels exceeds the maximum allowed value\n");
@@ -160,6 +172,7 @@ int parse_mpd(char *filename, manifest *m)
             next_level->segments[k] = (char *)malloc(MAXURLLENGTH * sizeof(char));
 
         next_level->bitrate = atoi(bandwidth[j]);
+        fprintf(stdout, "bandwith: %ld\n", next_level->bitrate);
         if (strlen(init_url[j]) != 0)
         {
             newurl = str_replace(init_url[j], keyword_bw, bandwidth[j]);
@@ -176,7 +189,7 @@ int parse_mpd(char *filename, manifest *m)
             }
             else
             {
-                fprintf(stdout,"Replaced bandwidth \n");
+                fprintf(stdout, "Replaced bandwidth \n");
                 strcpy(next_level->segments[0], newurl);
                 free(newurl);
             }
