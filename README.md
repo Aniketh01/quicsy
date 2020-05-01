@@ -1,5 +1,7 @@
 # quicsy
-A standalone QUIC client and server based on ngtcp2 and nghttp3
+A standalone QUIC client and server based on ngtcp2 and nghttp3.
+
+Note:  The QUIC and HTTP/3 side of code is from the /examples of ngtcp2.
 
 Get a copy:
 
