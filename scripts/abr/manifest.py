@@ -26,8 +26,8 @@ def check_and_create(dir_path):
 
 def main():
     parser = argparse.ArgumentParser()
-	parser.add_argument('--prefix', '-p', help='Prefix')
-	parser.add_argument('--fps', help="Frames per second to use for re-encoding")
+    parser.add_argument('--prefix', '-p', help='Prefix')
+    parser.add_argument('--fps', help="Frames per second to use for re-encoding")
     parser.add_argument('-i', '--input', required=True,
                         help='The path to the video file (required).')
     args = parser.parse_args()
@@ -39,12 +39,12 @@ def main():
             prefix = args.prefix
     else:
         print ("No prefix given")
-
+    
     if args.input:
-		source = args.input 
+        source = args.input 
 
     if args.fps:
-		framerate = args.fps
+        framerate = args.fps
 
 
     logging.debug("input: " + args.input + ", datetime: " + str(datetime.datetime.now()))
