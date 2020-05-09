@@ -74,6 +74,7 @@ def main_segmentize():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--prefix', '-p', help='Prefix')
+    parser.add_argument('--action', required=True, help='Action to be performed by the script. Possible actions are: encode, segmentation')
     parser.add_argument('--fps', help="Frames per second to use for re-encoding")
     parser.add_argument('-i', '--input',
                         help='The path to the video file (required).')
@@ -101,6 +102,13 @@ def main():
     logging.debug("input: " + args.input + ", datetime: " + str(datetime.datetime.now()))
     check_and_create(prefix)
 
+    print ('Running "%s" script with arguemnts: prefix(%s) source(%s) fps(%s)' % (args.action, prefix, source, framerate))
+    if args.action == 'segmentation':
+        main_segmentize()
+    elif args.action == 'encode':
+        main_encode()
+    else:
+        print("Unknown action requested. Specify one of: truncate, encode")
 
 
 if __name__ == "__main__":
