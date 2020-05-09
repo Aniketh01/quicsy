@@ -15,6 +15,7 @@ source = 'Big_Buck_Bunny_1080_10s_10MB.mp4'
 prefix = 'dash/'
 framerate = 60
 
+frame_type = {'I-Frame': 'PICT_TYPE_I', 'P-Frame': 'PICT_TYPE_P', 'B-Frame': 'PICT_TYPE_B'}
 resolutions=['640x360', '854x480', '1280x720', '1920x1080']#, '2560x1440']
 bitrates=[1.5, 4, 7.5, 12]#, 24]
 
@@ -50,11 +51,31 @@ def main_encode():
 
 	print ('Started all threads')
 
+
+def segmentize(in_source, dst_dir):
+    print('in:%s out:%s' % (in_source, dst_dir))
+    for name, type in frame_type.items():
+        cmd = ("ffmpeg -i " + in_source + " -f image2 -vf " + """"select='eq(pict_type,""" +
+               type + """)'""" + "\" -vsync vfr " + dst_dir + "/" + name + "%03d.png")
+        os.system(cmd)
+
+
+# Assumes script is ran within the video roots direcoty
+def main_segmentize():
+    for resolution in resolutions:
+        quality = resolution.split('x')[1]
+        #dst = res + '/out'
+        in_source = ('%s%s/bbb_%s_%s.mp4' % (prefix, quality, quality, framerate))
+        check_and_create('%s%s/out' % (prefix, quality))
+        out_dir = '%s%s/out' % (prefix, quality)
+        segmentize(in_source, out_dir)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--prefix', '-p', help='Prefix')
     parser.add_argument('--fps', help="Frames per second to use for re-encoding")
-    parser.add_argument('-i', '--input', required=True,
+    parser.add_argument('-i', '--input',
                         help='The path to the video file (required).')
     args = parser.parse_args()
 
@@ -80,7 +101,7 @@ def main():
     logging.debug("input: " + args.input + ", datetime: " + str(datetime.datetime.now()))
     check_and_create(prefix)
 
-    main_encode()
+
 
 if __name__ == "__main__":
     sys.exit(main())
