@@ -3,6 +3,7 @@ import sys
 import logging
 import datetime
 import time
+import json
 import os
 from threading import Thread
 
@@ -18,6 +19,13 @@ framerate = 60
 frame_type = {'I-Frame': 'PICT_TYPE_I', 'P-Frame': 'PICT_TYPE_P', 'B-Frame': 'PICT_TYPE_B'}
 resolutions=['640x360', '854x480', '1280x720', '1920x1080']#, '2560x1440']
 bitrates=[1.5, 4, 7.5, 12]#, 24]
+
+
+def load_json(path):
+    with open(path) as file:
+        obj = json.load(file)
+    return obj
+
 
 def check_and_create(dir_path):
     dir_path = os.getcwd() + '/' + dir_path
