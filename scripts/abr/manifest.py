@@ -4,6 +4,7 @@ import logging
 import datetime
 import time
 import json
+from glob import glob
 import os
 from threading import Thread
 
@@ -25,6 +26,22 @@ def load_json(path):
     with open(path) as file:
         obj = json.load(file)
     return obj
+
+
+def get_segment_size():
+    segment_size_list = []
+
+    for idx in range(len(resolutions)):
+        sg_size_res = []
+        quality = resolutions[idx].split('x')[1]
+        destination = ( prefix if prefix else '' ) + '%s/out/' % (quality)
+        files = glob(destination + '/*')
+        for file in files:
+            size = os.path.getsize(file)
+            sg_size_res.append(size)
+        segment_size_list.append(sg_size_res)
+
+    return segment_size_list
 
 
 def check_and_create(dir_path):
