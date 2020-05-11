@@ -101,10 +101,14 @@ def prepare_mpd(seg_duration):
     for b in bitrates:
         bitrates_kbps.append(b*1000)
 
+    seg_size = get_segment_size()
+    seg_size= list(map(list, zip(*seg_size)))
+
     manifest = {
         #"Segment_duration_ms": 10000,
         "segment_duration_ms": seg_duration,
-        "bitrates_kbps": bitrates_kbps
+        "bitrates_kbps": bitrates_kbps,
+        "segment_size_bytes": seg_size
     }
 
     with open('bbb_m.json', 'w') as f:
