@@ -79,10 +79,26 @@ def main_segmentize():
         segmentize(in_source, out_dir)
 
 
+def prepare_mpd(seg_duration):
+    bitrates_kbps = []
+    for b in bitrates:
+        bitrates_kbps.append(b*1000)
+
+    manifest = {
+        #"Segment_duration_ms": 10000,
+        "segment_duration_ms": seg_duration,
+        "bitrates_kbps": bitrates_kbps
+    }
+
+    with open('bbb_m.json', 'w') as f:
+        json.dump(manifest, f, indent=4)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--prefix', '-p', help='Prefix')
-    parser.add_argument('--action', required=True, help='Action to be performed by the script. Possible actions are: encode, segmentation')
+    parser.add_argument('--seg_duration', '-sd', help='segment duration')
+    parser.add_argument('--action', required=True, help='Action to be performed by the script. Possible actions are: encode, segmentation, mpd')
     parser.add_argument('--fps', help="Frames per second to use for re-encoding")
     parser.add_argument('-i', '--input',
                         help='The path to the video file (required).')
@@ -115,6 +131,8 @@ def main():
         main_segmentize()
     elif args.action == 'encode':
         main_encode()
+    elif args.action == 'mpd':
+        prepare_mpd(args.seg_duration)
     else:
         print("Unknown action requested. Specify one of: truncate, encode")
 
