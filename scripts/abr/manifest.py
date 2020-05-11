@@ -77,11 +77,11 @@ def main_encode():
 	print ('Started all threads')
 
 
-def segmentize(in_source, dst_dir):
+def segmentize(in_source, dst_dir, quality):
     print('in:%s out:%s' % (in_source, dst_dir))
     for name, type in frame_type.items():
         cmd = ("ffmpeg -i " + in_source + " -f image2 -vf " + """"select='eq(pict_type,""" +
-               type + """)'""" + "\" -vsync vfr " + dst_dir + "/" + name + "%03d.png")
+               type + """)'""" + "\" -vsync vfr " + dst_dir + "/" + name + "-" + "%03d-" + quality + "p-.png")
         os.system(cmd)
 
 
@@ -93,7 +93,7 @@ def main_segmentize():
         in_source = ('%s%s/bbb_%s_%s.mp4' % (prefix, quality, quality, framerate))
         check_and_create('%s%s/out' % (prefix, quality))
         out_dir = '%s%s/out' % (prefix, quality)
-        segmentize(in_source, out_dir)
+        segmentize(in_source, out_dir, quality)
 
 
 def prepare_mpd(seg_duration):
